@@ -1,0 +1,3311 @@
+openapi: 3.0.3
+info:
+  title: House of Runs API
+  version: 1.0.0
+  description: OpenAPI documentation for the House of Runs coursework system. The system manages Hades escape attempts, users,
+    weapons, boons, run-boon relationships, authentication, role-based administration, and JSON import of run-history files.
+    All protected services use token authentication, async database access, centralized Problem Details errors, filtering,
+    sorting, and pagination where a list is returned. Hades save file data is imported using a Mod (https://www.nexusmods.com/hades/mods/54?tab=description), localization/translation (to be implemented) uses the games own mapping sjson files language files so it should be seemless. Main idea of the project is sharing builds/achievements/challanges between players, as well as manually edited crazy run scenarios.               - Vasil Kirov FacN:2401321072
+servers:
+- url: http://localhost:5119
+  description: Local HTTP backend
+tags:
+- name: Auth
+  description: Registration, login and current-user profile services.
+- name: Users
+  description: Admin-only user management CRUD services.
+- name: Weapons
+  description: Admin-only weapon/aspect lookup CRUD services.
+- name: Boons
+  description: Admin-only boon lookup CRUD services.
+- name: Runs
+  description: Run CRUD services. Normal users manage only their own runs; administrators can manage all runs.
+- name: RunBoons
+  description: CRUD services for the many-to-many relationship between runs and boons.
+- name: Import
+  description: JSON import services for Hades ExportRunHistory files.
+- name: TraitLocalizations
+  description: Services for resolving raw Hades trait identifiers from ExportRunHistory/CodexText files to display-friendly
+    names.
+- name: ClearMessages
+  description: Services for clear-message metadata and GameStateRequirements imported from RunClearMessageData.lua.
+paths:
+  /api/auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Register user
+      description: Creates a normal User account. Validates unique email and username, email format, required fields, text
+        lengths and password length. Returns an authentication token and profile data.
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Registration successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Email or username already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Login
+      description: Authenticates with email or username plus password. Inactive accounts and wrong credentials return 401
+        without exposing password details.
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Invalid credentials or inactive user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/auth/me:
+    get:
+      tags:
+      - Auth
+      summary: Current user
+      description: Returns the profile represented by the current bearer token.
+      responses:
+        '200':
+          description: Current user profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/users:
+    get:
+      tags:
+      - Users
+      summary: List users
+      description: Returns a paged, sorted, filtered list of users. Requires Admin role.
+      parameters:
+      - name: q
+        in: query
+        required: false
+        description: Searches username, display name and bio.
+        schema:
+          type: string
+          maxLength: 120
+      - name: email
+        in: query
+        required: false
+        description: Filters by email substring.
+        schema:
+          type: string
+          maxLength: 120
+      - name: isActive
+        in: query
+        required: false
+        description: Filters active/inactive accounts.
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        required: false
+        description: 1-based page number. Values below 1 are normalized to 1.
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: Number of records per page. Server clamps values to the range 1..50.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+      - name: sortBy
+        in: query
+        required: false
+        description: Field used for sorting. Unsupported values fall back to the default sort field.
+        schema:
+          type: string
+      - name: sortDir
+        in: query
+        required: false
+        description: Sort direction.
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      responses:
+        '200':
+          description: Paged list response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedUserResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    post:
+      tags:
+      - Users
+      summary: Create user
+      description: Creates a new users resource after validating all required fields, max lengths and numeric ranges. Requires
+        Admin role.
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/users/{id}:
+    get:
+      tags:
+      - Users
+      summary: Get users by id
+      description: Returns a single users resource by identifier. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique user identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Resource found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    put:
+      tags:
+      - Users
+      summary: Update users by id
+      description: Replaces editable fields of an existing users resource. The same validation rules used during creation
+        are applied. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique user identifier.
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - Users
+      summary: Delete users by id
+      description: Deletes an existing users resource. Related data is protected by database relationships and application
+        checks. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique user identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Deleted successfully; no response body.
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/weapons:
+    get:
+      tags:
+      - Weapons
+      summary: List weapons
+      description: Returns a paged, sorted, filtered list of weapons. Requires Admin role.
+      parameters:
+      - name: q
+        in: query
+        required: false
+        description: Searches name, aspect name and description.
+        schema:
+          type: string
+          maxLength: 120
+      - name: weaponType
+        in: query
+        required: false
+        description: Filters by weapon type.
+        schema:
+          type: string
+          maxLength: 40
+      - name: isUnlocked
+        in: query
+        required: false
+        description: Filters by unlock status.
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        required: false
+        description: 1-based page number. Values below 1 are normalized to 1.
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: Number of records per page. Server clamps values to the range 1..50.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+      - name: sortBy
+        in: query
+        required: false
+        description: Field used for sorting. Unsupported values fall back to the default sort field.
+        schema:
+          type: string
+      - name: sortDir
+        in: query
+        required: false
+        description: Sort direction.
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      responses:
+        '200':
+          description: Paged list response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedWeaponResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    post:
+      tags:
+      - Weapons
+      summary: Create weapon
+      description: Creates a new weapons resource after validating all required fields, max lengths and numeric ranges. Requires
+        Admin role.
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeaponRequest'
+      responses:
+        '201':
+          description: Created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeaponResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/weapons/{id}:
+    get:
+      tags:
+      - Weapons
+      summary: Get weapons by id
+      description: Returns a single weapons resource by identifier. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique weapon identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Resource found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeaponResponse'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    put:
+      tags:
+      - Weapons
+      summary: Update weapons by id
+      description: Replaces editable fields of an existing weapons resource. The same validation rules used during creation
+        are applied. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique weapon identifier.
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeaponRequest'
+      responses:
+        '200':
+          description: Updated resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeaponResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - Weapons
+      summary: Delete weapons by id
+      description: Deletes an existing weapons resource. Related data is protected by database relationships and application
+        checks. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique weapon identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Deleted successfully; no response body.
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/boons:
+    get:
+      tags:
+      - Boons
+      summary: List boons
+      description: Returns a paged, sorted, filtered list of boons. Requires Admin role.
+      parameters:
+      - name: q
+        in: query
+        required: false
+        description: Searches name and description.
+        schema:
+          type: string
+          maxLength: 120
+      - name: god
+        in: query
+        required: false
+        description: Filters by Olympian god.
+        schema:
+          type: string
+          maxLength: 40
+      - name: rarity
+        in: query
+        required: false
+        description: Filters by rarity.
+        schema:
+          type: string
+          maxLength: 30
+      - name: effectType
+        in: query
+        required: false
+        description: Filters by effect type.
+        schema:
+          type: string
+          maxLength: 50
+      - name: isDuo
+        in: query
+        required: false
+        description: Filters duo boons.
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        required: false
+        description: 1-based page number. Values below 1 are normalized to 1.
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: Number of records per page. Server clamps values to the range 1..50.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+      - name: sortBy
+        in: query
+        required: false
+        description: Field used for sorting. Unsupported values fall back to the default sort field.
+        schema:
+          type: string
+      - name: sortDir
+        in: query
+        required: false
+        description: Sort direction.
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      responses:
+        '200':
+          description: Paged list response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedBoonResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    post:
+      tags:
+      - Boons
+      summary: Create boon
+      description: Creates a new boons resource after validating all required fields, max lengths and numeric ranges. Requires
+        Admin role.
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoonRequest'
+      responses:
+        '201':
+          description: Created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoonResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/boons/{id}:
+    get:
+      tags:
+      - Boons
+      summary: Get boons by id
+      description: Returns a single boons resource by identifier. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique boon identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Resource found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoonResponse'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    put:
+      tags:
+      - Boons
+      summary: Update boons by id
+      description: Replaces editable fields of an existing boons resource. The same validation rules used during creation
+        are applied. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique boon identifier.
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoonRequest'
+      responses:
+        '200':
+          description: Updated resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoonResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - Boons
+      summary: Delete boons by id
+      description: Deletes an existing boons resource. Related data is protected by database relationships and application
+        checks. Requires Admin role.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique boon identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Deleted successfully; no response body.
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/runs:
+    get:
+      tags:
+      - Runs
+      summary: List runs
+      description: Returns a paged, sorted, filtered list of runs. Requires authenticated user.
+      parameters:
+      - name: q
+        in: query
+        required: false
+        description: Searches title, notes, user name and weapon/aspect names.
+        schema:
+          type: string
+          maxLength: 120
+      - name: userId
+        in: query
+        required: false
+        description: Admin filter by owner user id; ignored for normal users.
+        schema:
+          type: string
+          format: uuid
+      - name: weaponId
+        in: query
+        required: false
+        description: Filters by weapon id.
+        schema:
+          type: string
+          format: uuid
+      - name: result
+        in: query
+        required: false
+        description: Filters by run result.
+        schema:
+          type: string
+          maxLength: 20
+          enum:
+          - Escaped
+          - Died
+      - name: finalBiome
+        in: query
+        required: false
+        description: Filters by final biome.
+        schema:
+          type: string
+          maxLength: 40
+      - name: minHeat
+        in: query
+        required: false
+        description: Minimum heat level.
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 64
+      - name: maxHeat
+        in: query
+        required: false
+        description: Maximum heat level.
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 64
+      - name: mineOnly
+        in: query
+        required: false
+        description: When true, returns only the current user's runs. Normal users are always restricted to their own runs.
+        schema:
+          type: boolean
+          default: false
+      - name: page
+        in: query
+        required: false
+        description: 1-based page number. Values below 1 are normalized to 1.
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: Number of records per page. Server clamps values to the range 1..50.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+      - name: sortBy
+        in: query
+        required: false
+        description: Field used for sorting. Unsupported values fall back to the default sort field.
+        schema:
+          type: string
+      - name: sortDir
+        in: query
+        required: false
+        description: Sort direction.
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      responses:
+        '200':
+          description: Paged list response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedRunResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    post:
+      tags:
+      - Runs
+      summary: Create run
+      description: Creates a new runs resource after validating all required fields, max lengths and numeric ranges. Requires
+        authenticated user.
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunRequest'
+      responses:
+        '201':
+          description: Created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/runs/{id}:
+    get:
+      tags:
+      - Runs
+      summary: Get runs by id
+      description: Returns a single runs resource by identifier. Requires authenticated user.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique run identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Resource found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResponse'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    put:
+      tags:
+      - Runs
+      summary: Update runs by id
+      description: Replaces editable fields of an existing runs resource. The same validation rules used during creation are
+        applied. Requires authenticated user.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique run identifier.
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunRequest'
+      responses:
+        '200':
+          description: Updated resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - Runs
+      summary: Delete runs by id
+      description: Deletes an existing runs resource. Related data is protected by database relationships and application
+        checks. Requires authenticated user.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique run identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Deleted successfully; no response body.
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/run-boons:
+    get:
+      tags:
+      - RunBoons
+      summary: List runboons
+      description: Returns a paged, sorted, filtered list of runboons. Requires authenticated user.
+      parameters:
+      - name: runId
+        in: query
+        required: false
+        description: Filters by run id.
+        schema:
+          type: string
+          format: uuid
+      - name: boonId
+        in: query
+        required: false
+        description: Filters by boon id.
+        schema:
+          type: string
+          format: uuid
+      - name: slotType
+        in: query
+        required: false
+        description: Filters by slot type.
+        schema:
+          type: string
+          maxLength: 50
+      - name: rarity
+        in: query
+        required: false
+        description: Filters by rarity used.
+        schema:
+          type: string
+          maxLength: 30
+      - name: isCore
+        in: query
+        required: false
+        description: Filters core boons.
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        required: false
+        description: 1-based page number. Values below 1 are normalized to 1.
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        description: Number of records per page. Server clamps values to the range 1..50.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+      - name: sortBy
+        in: query
+        required: false
+        description: Field used for sorting. Unsupported values fall back to the default sort field.
+        schema:
+          type: string
+      - name: sortDir
+        in: query
+        required: false
+        description: Sort direction.
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      responses:
+        '200':
+          description: Paged list response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedRunBoonResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    post:
+      tags:
+      - RunBoons
+      summary: Create runboon
+      description: Creates a new runboons resource after validating all required fields, max lengths and numeric ranges. Requires
+        authenticated user.
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunBoonRequest'
+      responses:
+        '201':
+          description: Created resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunBoonResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/run-boons/{id}:
+    get:
+      tags:
+      - RunBoons
+      summary: Get runboons by id
+      description: Returns a single runboons resource by identifier. Requires authenticated user.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique runboon identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Resource found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunBoonResponse'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    put:
+      tags:
+      - RunBoons
+      summary: Update runboons by id
+      description: Replaces editable fields of an existing runboons resource. The same validation rules used during creation
+        are applied. Requires authenticated user.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique runboon identifier.
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Request payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunBoonRequest'
+      responses:
+        '200':
+          description: Updated resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunBoonResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Uniqueness or relationship conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - RunBoons
+      summary: Delete runboons by id
+      description: Deletes an existing runboons resource. Related data is protected by database relationships and application
+        checks. Requires authenticated user.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique runboon identifier.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Deleted successfully; no response body.
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient role or ownership.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/import/run-draft:
+    post:
+      tags:
+      - Import
+      summary: Import one run draft
+      description: 'Accepts a non-empty .json file exported by the Hades run-history mod and returns one editable run draft.
+        If runIndex is supplied, that run index is imported; otherwise the latest run is selected. Size limit: 2 MB. During
+        parsing the service maps weapon/aspect, result, heat, duration, biomes and boons, and may create missing lookup records
+        server-side. The importer accepts the ExportRunHistory JSON shape with runs[index,result,time,clearMessage,weapon,aspect,keepsake,companion,trait,heat,darkness].
+        Trait rarity is stored as Unknown because the export does not include rarity.'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImportRunDraftRequest'
+      responses:
+        '200':
+          description: Generated run draft.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportRunDraftResponse'
+        '400':
+          description: Invalid, empty, non-JSON or unparsable file.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/import/run-drafts:
+    post:
+      tags:
+      - Import
+      summary: Import all run drafts
+      description: 'Accepts a non-empty .json ExportRunHistory file and returns all runs as editable drafts ordered by import
+        index descending. Size limit: 8 MB. The importer accepts the ExportRunHistory JSON shape with runs[index,result,time,clearMessage,weapon,aspect,keepsake,companion,trait,heat,darkness].
+        Trait rarity is stored as Unknown because the export does not include rarity.'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImportRunsDraftRequest'
+      responses:
+        '200':
+          description: Generated run draft list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportRunsDraftResponse'
+        '400':
+          description: Invalid, empty, non-JSON or unparsable file.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/trait-localizations/{rawTraitName}:
+    get:
+      tags:
+      - TraitLocalizations
+      summary: Resolve Hades trait identifier
+      description: Returns the display/localized name for a raw Hades trait identifier from an imported localization file.
+        If no mapping exists, isResolved is false and the API may return the raw identifier as fallback.
+      parameters:
+      - name: rawTraitName
+        in: path
+        required: true
+        schema:
+          type: string
+          maxLength: 100
+      - name: language
+        in: query
+        required: false
+        schema:
+          type: string
+          default: en
+          maxLength: 10
+      responses:
+        '200':
+          description: Localization lookup result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraitLocalizationResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+    put:
+      tags:
+      - TraitLocalizations
+      summary: Create or update trait localization
+      description: Admin-only service for manually fixing a raw trait identifier that could not be resolved from CodexText.
+      parameters:
+      - name: rawTraitName
+        in: path
+        required: true
+        schema:
+          type: string
+          maxLength: 100
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraitLocalizationRequest'
+      responses:
+        '200':
+          description: Localization saved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraitLocalizationResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/trait-localizations/import:
+    post:
+      tags:
+      - TraitLocalizations
+      summary: Import CodexText localization file
+      description: Uploads CodexText.en.sjson or another language file and extracts mappings from Hades internal IDs to display
+        names. Missing mappings are tolerated and reported as warnings.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImportTraitLocalizationsRequest'
+      responses:
+        '200':
+          description: Localization import result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportTraitLocalizationsResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/clear-messages:
+    get:
+      tags:
+      - ClearMessages
+      summary: List clear-message rules
+      description: Lists clear-message codes and parsed GameStateRequirements imported from RunClearMessageData.lua.
+      parameters:
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+      - name: priorityOnly
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        description: Page number, starting from 1.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        description: Number of items per page.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: sortBy
+        in: query
+        description: Sort by code, displayName or priority.
+        required: false
+        schema:
+          type: string
+          enum:
+          - code
+          - displayName
+          - priority
+          default: code
+      - name: sortDir
+        in: query
+        description: Sorting direction.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      responses:
+        '200':
+          description: Clear-message rule list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedClearMessageRuleResponse'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/clear-messages/{code}:
+    get:
+      tags:
+      - ClearMessages
+      summary: Get clear-message rule
+      description: Returns one clear-message rule by raw code, including its parsed condition fields.
+      parameters:
+      - name: code
+        in: path
+        required: true
+        schema:
+          type: string
+          maxLength: 100
+      responses:
+        '200':
+          description: Clear-message rule.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClearMessageRuleResponse'
+        '404':
+          description: Clear-message code not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/clear-messages/import:
+    post:
+      tags:
+      - ClearMessages
+      summary: Import RunClearMessageData.lua
+      description: Admin-only import that parses Hades clear-message definitions and their GameStateRequirements from the
+        Lua source file.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImportClearMessagesRequest'
+      responses:
+        '200':
+          description: Clear-message import result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportClearMessagesResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/import/export-run-history/validate:
+    post:
+      tags:
+      - Import
+      summary: Validate ExportRunHistory JSON
+      description: Validates the raw output.json structure before creating run drafts. Checks that runs is present, index
+        values are positive, time uses mm:ss.ff format, trait entries include traitName and traitLevel, and heat/darkness
+        arrays are structurally valid.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRunHistoryFile'
+      responses:
+        '200':
+          description: Validation succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - isValid
+                - runCount
+                properties:
+                  isValid:
+                    type: boolean
+                  runCount:
+                    type: integer
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+  /api/trait-localizations:
+    get:
+      tags:
+      - TraitLocalizations
+      summary: List trait localizations
+      description: Returns Hades raw trait identifiers mapped to display names extracted from CodexText localization files.
+        Supports filtering by raw identifier/display name and language, plus pagination and sorting.
+      parameters:
+      - name: search
+        in: query
+        description: Search by raw trait name or localized display name.
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+      - name: language
+        in: query
+        description: Localization language code, for example en.
+        required: false
+        schema:
+          type: string
+          maxLength: 10
+          default: en
+      - name: page
+        in: query
+        description: Page number, starting from 1.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        description: Number of items per page.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: sortBy
+        in: query
+        description: Sort by rawTraitName, localizedName, language or lastImportedAt.
+        required: false
+        schema:
+          type: string
+          enum:
+          - rawTraitName
+          - localizedName
+          - language
+          - lastImportedAt
+          default: rawTraitName
+      - name: sortDir
+        in: query
+        description: Sorting direction.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      responses:
+        '200':
+          description: Paged trait-localization list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTraitLocalizationResponse'
+        '401':
+          description: Missing, invalid or expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      security:
+      - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: custom token
+      description: 'Send the access token returned by /api/auth/login or /api/auth/register as Authorization: Bearer {token}.'
+  schemas:
+    ProblemDetails:
+      type: object
+      description: Standardized RFC 7807-style error response used by global exception handling and validation failures. Raw
+        stack traces are not returned.
+      properties:
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Optional model validation errors.
+    RegisterRequest:
+      type: object
+      required:
+      - userName
+      - email
+      - displayName
+      - password
+      properties:
+        userName:
+          type: string
+          maxLength: 32
+        email:
+          type: string
+          format: email
+          maxLength: 120
+        displayName:
+          type: string
+          maxLength: 60
+        password:
+          type: string
+          format: password
+          minLength: 6
+          maxLength: 80
+    LoginRequest:
+      type: object
+      required:
+      - emailOrUserName
+      - password
+      properties:
+        emailOrUserName:
+          type: string
+          maxLength: 120
+        password:
+          type: string
+          format: password
+          maxLength: 80
+    AuthResponse:
+      type: object
+      required:
+      - token
+      - user
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserResponse'
+    UserResponse:
+      type: object
+      required:
+      - id
+      - userName
+      - email
+      - displayName
+      - role
+      - reputation
+      - isActive
+      - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        bio:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          type: string
+          enum:
+          - User
+          - Admin
+        reputation:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    CreateUserRequest:
+      type: object
+      required:
+      - userName
+      - email
+      - displayName
+      - password
+      - role
+      properties:
+        userName:
+          type: string
+          maxLength: 32
+        email:
+          type: string
+          format: email
+          maxLength: 120
+        displayName:
+          type: string
+          maxLength: 60
+        password:
+          type: string
+          format: password
+          minLength: 6
+          maxLength: 80
+        bio:
+          type: string
+          maxLength: 300
+          nullable: true
+        avatarUrl:
+          type: string
+          format: uri
+          maxLength: 300
+          nullable: true
+        role:
+          type: string
+          enum:
+          - User
+          - Admin
+          maxLength: 20
+          default: User
+        reputation:
+          type: integer
+          minimum: 0
+          maximum: 999999
+          default: 0
+        isActive:
+          type: boolean
+          default: true
+      description: 'Request schema documents API-level validation: required fields, string maxLength constraints, numeric
+        ranges, URL/email formats, and relationship identifiers where applicable. The frontend uses the same constraints as
+        the backend database model.'
+    UpdateUserRequest:
+      type: object
+      required:
+      - userName
+      - email
+      - displayName
+      - role
+      - isActive
+      properties:
+        userName:
+          type: string
+          maxLength: 32
+        email:
+          type: string
+          format: email
+          maxLength: 120
+        displayName:
+          type: string
+          maxLength: 60
+        bio:
+          type: string
+          maxLength: 300
+          nullable: true
+        avatarUrl:
+          type: string
+          format: uri
+          maxLength: 300
+          nullable: true
+        role:
+          type: string
+          enum:
+          - User
+          - Admin
+          maxLength: 20
+          default: User
+        reputation:
+          type: integer
+          minimum: 0
+          maximum: 999999
+          default: 0
+        isActive:
+          type: boolean
+          default: true
+      description: 'Request schema documents API-level validation: required fields, string maxLength constraints, numeric
+        ranges, URL/email formats, and relationship identifiers where applicable. The frontend uses the same constraints as
+        the backend database model.'
+    WeaponResponse:
+      type: object
+      required:
+      - id
+      - name
+      - aspectName
+      - weaponType
+      - titanBloodLevel
+      - unlockCost
+      - baseDamage
+      - isUnlocked
+      - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        aspectName:
+          type: string
+        weaponType:
+          type: string
+        titanBloodLevel:
+          type: integer
+        unlockCost:
+          type: integer
+        baseDamage:
+          type: number
+          format: decimal
+        isUnlocked:
+          type: boolean
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    WeaponRequest:
+      type: object
+      required:
+      - name
+      - aspectName
+      - weaponType
+      properties:
+        name:
+          type: string
+          maxLength: 60
+        aspectName:
+          type: string
+          maxLength: 60
+        weaponType:
+          type: string
+          maxLength: 40
+        titanBloodLevel:
+          type: integer
+          minimum: 0
+          maximum: 5
+        unlockCost:
+          type: integer
+          minimum: 0
+          maximum: 25
+        baseDamage:
+          type: number
+          minimum: 0
+          maximum: 9999
+        isUnlocked:
+          type: boolean
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+      description: 'Request schema documents API-level validation: required fields, string maxLength constraints, numeric
+        ranges, URL/email formats, and relationship identifiers where applicable. The frontend uses the same constraints as
+        the backend database model.'
+    BoonResponse:
+      type: object
+      required:
+      - id
+      - name
+      - god
+      - rarity
+      - effectType
+      - level
+      - powerScale
+      - isDuo
+      - isLegendary
+      - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        god:
+          type: string
+        rarity:
+          type: string
+        effectType:
+          type: string
+        level:
+          type: integer
+        powerScale:
+          type: number
+          format: decimal
+        isDuo:
+          type: boolean
+        isLegendary:
+          type: boolean
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    BoonRequest:
+      type: object
+      required:
+      - name
+      - god
+      - rarity
+      - effectType
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        god:
+          type: string
+          maxLength: 40
+        rarity:
+          type: string
+          maxLength: 30
+        effectType:
+          type: string
+          maxLength: 50
+        level:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+        powerScale:
+          type: number
+          minimum: 0
+          maximum: 999
+          default: 1
+        isDuo:
+          type: boolean
+        isLegendary:
+          type: boolean
+        description:
+          type: string
+          maxLength: 600
+          nullable: true
+      description: 'Request schema documents API-level validation: required fields, string maxLength constraints, numeric
+        ranges, URL/email formats, and relationship identifiers where applicable. The frontend uses the same constraints as
+        the backend database model.'
+    RunBoonResponse:
+      type: object
+      required:
+      - id
+      - runId
+      - boonId
+      - boonName
+      - god
+      - slotType
+      - rarityUsed
+      - levelUsed
+      - pickedInBiome
+      - isCoreBoon
+      - pomLevel
+      - addedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        runId:
+          type: string
+          format: uuid
+        boonId:
+          type: string
+          format: uuid
+        boonName:
+          type: string
+        god:
+          type: string
+        slotType:
+          type: string
+        rarityUsed:
+          type: string
+          nullable: true
+          description: May be Unknown/null for imported Hades runs because rarity is not present in the ExportRunHistory output.
+        levelUsed:
+          type: integer
+        pickedInBiome:
+          type: string
+        isCoreBoon:
+          type: boolean
+        pomLevel:
+          type: integer
+        notes:
+          type: string
+          nullable: true
+        addedAt:
+          type: string
+          format: date-time
+        rawTraitName:
+          type: string
+          nullable: true
+        localizedTraitName:
+          type: string
+          nullable: true
+        sourceType:
+          type: string
+          nullable: true
+          enum:
+          - Boon
+          - WeaponUpgrade
+          - Aspect
+          - Keepsake
+          - MetaUpgrade
+          - Temporary
+          - Unknown
+    RunBoonRequest:
+      type: object
+      required:
+      - runId
+      - boonId
+      - slotType
+      - pickedInBiome
+      properties:
+        runId:
+          type: string
+          format: uuid
+        boonId:
+          type: string
+          format: uuid
+        slotType:
+          type: string
+          maxLength: 50
+        rarityUsed:
+          type: string
+          maxLength: 30
+          nullable: true
+          default: Unknown
+          description: Optional because ExportRunHistory does not expose boon rarity; use Unknown when not available.
+        levelUsed:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+        pickedInBiome:
+          type: string
+          maxLength: 40
+        isCoreBoon:
+          type: boolean
+        pomLevel:
+          type: integer
+          minimum: 0
+          maximum: 20
+        notes:
+          type: string
+          maxLength: 300
+          nullable: true
+        rawTraitName:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: Original Hades trait identifier from ExportRunHistory, e.g. ZeusBonusBounceTrait or SpeedDamageTrait.
+        localizedTraitName:
+          type: string
+          maxLength: 120
+          nullable: true
+          description: Resolved human-readable trait name from a localization source such as CodexText.en.sjson when available.
+        sourceType:
+          type: string
+          maxLength: 30
+          nullable: true
+          enum:
+          - Boon
+          - WeaponUpgrade
+          - Aspect
+          - Keepsake
+          - MetaUpgrade
+          - Temporary
+          - Unknown
+          description: Best-effort classification of the raw Hades trait.
+      description: 'Request schema documents API-level validation: required fields, string maxLength constraints, numeric
+        ranges, URL/email formats, and relationship identifiers where applicable. The frontend uses the same constraints as
+        the backend database model.'
+    RunResponse:
+      type: object
+      required:
+      - id
+      - userId
+      - userName
+      - displayName
+      - weaponId
+      - weaponName
+      - aspectName
+      - title
+      - heatLevel
+      - durationSeconds
+      - result
+      - finalBiome
+      - playedAt
+      - isPublic
+      - source
+      - createdAt
+      - boons
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        displayName:
+          type: string
+        weaponId:
+          type: string
+          format: uuid
+        weaponName:
+          type: string
+        aspectName:
+          type: string
+        title:
+          type: string
+        heatLevel:
+          type: integer
+        durationSeconds:
+          type: integer
+        result:
+          type: string
+          enum:
+          - Escaped
+          - Died
+        finalBiome:
+          type: string
+        defeatedBoss:
+          type: string
+          nullable: true
+        playedAt:
+          type: string
+          format: date-time
+        isPublic:
+          type: boolean
+        source:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        screenshotUrl:
+          type: string
+          format: uri
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        boons:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunBoonResponse'
+        sourceRunIndex:
+          type: integer
+          nullable: true
+          description: Original index field from ExportRunHistory output.json.
+        sourceResultCode:
+          type: string
+          nullable: true
+          description: Raw result code, e.g. RunHistoryScreenResult_Tartarus or RunHistoryScreen_Cleared.
+        clearMessageCode:
+          type: string
+          nullable: true
+          description: Raw clearMessage value, e.g. ClearNumOne.
+        clearMessageName:
+          type: string
+          nullable: true
+          description: Optional human-readable clear message label if localized.
+        keepsakeTraitName:
+          type: string
+          nullable: true
+        companionTraitName:
+          type: string
+          nullable: true
+        darknessPoints:
+          type: integer
+          nullable: true
+          minimum: 0
+        darkness:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportedDarknessUpgrade'
+    RunRequest:
+      type: object
+      required:
+      - weaponId
+      - title
+      - result
+      - finalBiome
+      - source
+      properties:
+        weaponId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 120
+        heatLevel:
+          type: integer
+          minimum: 0
+          maximum: 64
+        durationSeconds:
+          type: integer
+          minimum: 0
+          maximum: 999999
+        result:
+          type: string
+          maxLength: 20
+          enum:
+          - Escaped
+          - Died
+          default: Died
+        finalBiome:
+          type: string
+          maxLength: 40
+          default: Tartarus
+        defeatedBoss:
+          type: string
+          maxLength: 80
+          nullable: true
+        playedAt:
+          type: string
+          format: date-time
+        isPublic:
+          type: boolean
+          default: true
+        source:
+          type: string
+          maxLength: 30
+          default: Manual
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+        screenshotUrl:
+          type: string
+          format: uri
+          maxLength: 300
+          nullable: true
+        boons:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunBoonRequest'
+          description: Optional nested boon selections for the run.
+        sourceRunIndex:
+          type: integer
+          nullable: true
+          minimum: 1
+        sourceResultCode:
+          type: string
+          nullable: true
+          maxLength: 100
+        clearMessageCode:
+          type: string
+          nullable: true
+          maxLength: 100
+        keepsakeTraitName:
+          type: string
+          nullable: true
+          maxLength: 100
+        companionTraitName:
+          type: string
+          nullable: true
+          maxLength: 100
+        darknessPoints:
+          type: integer
+          nullable: true
+          minimum: 0
+        darkness:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportedDarknessUpgrade'
+      description: 'Request schema documents API-level validation: required fields, string maxLength constraints, numeric
+        ranges, URL/email formats, and relationship identifiers where applicable. The frontend uses the same constraints as
+        the backend database model.'
+    PagedUserResponse:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - totalCount
+      - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 50
+        totalCount:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+    PagedWeaponResponse:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - totalCount
+      - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeaponResponse'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 50
+        totalCount:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+    PagedBoonResponse:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - totalCount
+      - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BoonResponse'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 50
+        totalCount:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+    PagedRunResponse:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - totalCount
+      - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunResponse'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 50
+        totalCount:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+    PagedRunBoonResponse:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - totalCount
+      - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunBoonResponse'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 50
+        totalCount:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+    ImportRunDraftRequest:
+      type: object
+      required:
+      - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Non-empty .json ExportRunHistory file. Max size 2 MB.
+        runIndex:
+          type: integer
+          nullable: true
+          description: Optional run index to import. When omitted, the latest run is selected.
+    ImportRunsDraftRequest:
+      type: object
+      required:
+      - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Non-empty .json ExportRunHistory file. Max size 8 MB.
+    ImportBoonDraftResponse:
+      type: object
+      required:
+      - name
+      - slotType
+      - levelUsed
+      - pickedInBiome
+      - isCoreBoon
+      - rawTraitName
+      - sourceType
+      properties:
+        boonId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+        god:
+          type: string
+          nullable: true
+        slotType:
+          type: string
+        rarityUsed:
+          type: string
+          nullable: true
+          default: Unknown
+          description: Unknown for ExportRunHistory imports because the mod output does not contain boon rarity.
+        levelUsed:
+          type: integer
+        pickedInBiome:
+          type: string
+        isCoreBoon:
+          type: boolean
+        rawTraitName:
+          type: string
+          description: Raw traitName exactly as exported by the mod.
+        localizedTraitName:
+          type: string
+          nullable: true
+          description: Localized display name resolved from CodexText.en.sjson or null when not found.
+        sourceType:
+          type: string
+          enum:
+          - Boon
+          - WeaponUpgrade
+          - Aspect
+          - Keepsake
+          - MetaUpgrade
+          - Temporary
+          - Unknown
+    ImportRunDraftResponse:
+      type: object
+      required:
+      - importIndex
+      - title
+      - heatLevel
+      - durationSeconds
+      - result
+      - finalBiome
+      - playedAt
+      - source
+      - boons
+      properties:
+        importIndex:
+          type: integer
+          description: Index of the imported run inside the source JSON.
+        title:
+          type: string
+        weaponId:
+          type: string
+          format: uuid
+          nullable: true
+        weaponName:
+          type: string
+          nullable: true
+        heatLevel:
+          type: integer
+        durationSeconds:
+          type: integer
+        result:
+          type: string
+          enum:
+          - Escaped
+          - Died
+        finalBiome:
+          type: string
+        defeatedBoss:
+          type: string
+          nullable: true
+        playedAt:
+          type: string
+          format: date-time
+        source:
+          type: string
+          example: Imported
+        notes:
+          type: string
+          nullable: true
+        boons:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportBoonDraftResponse'
+    ImportRunsDraftResponse:
+      type: object
+      required:
+      - runs
+      properties:
+        runs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportRunDraftResponse'
+    ExportRunHistoryFile:
+      type: object
+      required:
+      - runs
+      properties:
+        runs:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ExportedRun'
+      description: Raw JSON shape produced by the ExportRunHistory mod.
+    ExportedRun:
+      type: object
+      required:
+      - index
+      - result
+      - time
+      - weapon
+      - trait
+      - heatPoints
+      - heat
+      - darknessPoints
+      - darkness
+      properties:
+        index:
+          type: integer
+          minimum: 1
+        result:
+          type: string
+          maxLength: 100
+          description: Raw Hades result code.
+        time:
+          type: string
+          pattern: ^\d{1,2}:\d{2}(\.\d{1,2})?$
+          description: Run time as mm:ss.ff from the export file.
+        clearMessage:
+          type: string
+          nullable: true
+          maxLength: 100
+        weapon:
+          type: string
+          maxLength: 100
+        aspect:
+          type: string
+          nullable: true
+          maxLength: 100
+        keepsake:
+          type: string
+          nullable: true
+          maxLength: 100
+        companion:
+          type: string
+          nullable: true
+          maxLength: 100
+        trait:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportedTrait'
+        heatPoints:
+          type: integer
+          minimum: 0
+        heat:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportedHeatCondition'
+        darknessPoints:
+          type: integer
+          minimum: 0
+        darkness:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportedDarknessUpgrade'
+    ExportedTrait:
+      type: object
+      required:
+      - traitName
+      - traitLevel
+      properties:
+        traitName:
+          type: string
+          maxLength: 100
+          description: Internal Hades trait identifier.
+        traitLevel:
+          type: integer
+          minimum: 1
+          maximum: 20
+    ExportedHeatCondition:
+      type: object
+      properties:
+        heatName:
+          type: string
+          maxLength: 100
+        heatLevel:
+          type: integer
+          minimum: 0
+      additionalProperties: true
+    ExportedDarknessUpgrade:
+      type: object
+      required:
+      - darknessName
+      - darknessLevel
+      properties:
+        darknessName:
+          type: string
+          maxLength: 120
+        darknessLevel:
+          type: integer
+          minimum: 0
+    TraitLocalizationRequest:
+      type: object
+      required:
+      - rawTraitName
+      properties:
+        rawTraitName:
+          type: string
+          maxLength: 100
+        localizedName:
+          type: string
+          maxLength: 120
+        language:
+          type: string
+          maxLength: 10
+          default: en
+        sourceFile:
+          type: string
+          maxLength: 120
+          default: CodexText.en.sjson
+    TraitLocalizationResponse:
+      type: object
+      required:
+      - rawTraitName
+      - language
+      - isResolved
+      properties:
+        rawTraitName:
+          type: string
+        localizedName:
+          type: string
+          nullable: true
+        language:
+          type: string
+        sourceFile:
+          type: string
+          nullable: true
+        isResolved:
+          type: boolean
+        lastImportedAt:
+          type: string
+          format: date-time
+          nullable: true
+    ImportTraitLocalizationsRequest:
+      type: object
+      required:
+      - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: CodexText language file in .sjson/.json-like text format. Max size 5 MB.
+        language:
+          type: string
+          maxLength: 10
+          default: en
+        overwriteExisting:
+          type: boolean
+          default: false
+    ImportTraitLocalizationsResponse:
+      type: object
+      required:
+      - importedCount
+      - unresolvedCount
+      - language
+      properties:
+        importedCount:
+          type: integer
+          minimum: 0
+        updatedCount:
+          type: integer
+          minimum: 0
+        unresolvedCount:
+          type: integer
+          minimum: 0
+        language:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: string
+    ClearMessageRuleResponse:
+      type: object
+      required:
+      - code
+      - priority
+      - requirements
+      properties:
+        code:
+          type: string
+          description: Raw clear message key such as ClearNumOne or ClearTimeVeryFast.
+        displayName:
+          type: string
+          nullable: true
+        priority:
+          type: boolean
+          default: false
+        icon:
+          type: string
+          nullable: true
+        requirements:
+          $ref: '#/components/schemas/GameStateRequirements'
+        sourceFile:
+          type: string
+          nullable: true
+          example: RunClearMessageData.lua
+    GameStateRequirements:
+      type: object
+      description: Flexible object representing the Hades GameStateRequirements block. The backend stores parsed known fields
+        and preserves unknown fields.
+      properties:
+        requiredRunsCleared:
+          type: integer
+          nullable: true
+          minimum: 0
+        requiredCurrentClearTimeMax:
+          type: integer
+          nullable: true
+          minimum: 0
+          description: Maximum clear time in seconds.
+        requiredCurrentClearTimeMin:
+          type: integer
+          nullable: true
+          minimum: 0
+          description: Minimum clear time in seconds.
+        requiredCountOfTraitsCount:
+          type: integer
+          nullable: true
+          minimum: 0
+        requiredCountOfTraits:
+          type: array
+          items:
+            type: string
+        requiredOneOfTraits:
+          type: array
+          items:
+            type: string
+        requiredFalseTraits:
+          type: array
+          items:
+            type: string
+        requiredMinHealthFraction:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 1
+        requiredMaxHealthFraction:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 1
+        requiredMoneyMin:
+          type: integer
+          nullable: true
+          minimum: 0
+        requiredMoneyMax:
+          type: integer
+          nullable: true
+          minimum: 0
+      additionalProperties: true
+    ImportClearMessagesRequest:
+      type: object
+      required:
+      - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: RunClearMessageData.lua file. Max size 2 MB.
+        overwriteExisting:
+          type: boolean
+          default: false
+    ImportClearMessagesResponse:
+      type: object
+      required:
+      - importedCount
+      - updatedCount
+      - warnings
+      properties:
+        importedCount:
+          type: integer
+          minimum: 0
+        updatedCount:
+          type: integer
+          minimum: 0
+        warnings:
+          type: array
+          items:
+            type: string
+    PagedTraitLocalizationResponse:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - totalItems
+      - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraitLocalizationResponse'
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 20
+        totalItems:
+          type: integer
+          example: 120
+        totalPages:
+          type: integer
+          example: 6
+    PagedClearMessageRuleResponse:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - totalItems
+      - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClearMessageRuleResponse'
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 20
+        totalItems:
+          type: integer
+          example: 40
+        totalPages:
+          type: integer
+          example: 2
