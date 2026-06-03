@@ -75,6 +75,6 @@ password: admin1234
 
 ## Import Notes
 
-The import page accepts `output.json` from the ExportRunHistory mod. Leave the run index blank to import every run in the file as expandable drafts, or enter a specific `index` value from the JSON to import only that run.
+The import page accepts `output.json` from the ExportRunHistory mod. Leave the run index blank to import every run in the file as expandable drafts, or enter a specific `index` value from the JSON to import only that number of latest runs. If `index` is `5`, then only the last 5 runs will be imported.
 
 During import, the backend parses the run result, weapon, aspect, heat, duration, clear message, and traits. Missing weapon/aspect and boon/trait records are created automatically so each generated draft can be edited, saved, or deleted from the review list.
