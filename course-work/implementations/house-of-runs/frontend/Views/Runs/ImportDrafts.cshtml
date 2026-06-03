@@ -1,0 +1,124 @@
+@model IReadOnlyList<ImportRunDraftResponse>
+@{
+    ViewData["Title"] = "Import Drafts";
+}
+
+<section class="hero">
+    <h1>Import Drafts</h1>
+    <p>@Model.Count run draft(s) are waiting for review.</p>
+    <div class="actions">
+        <a class="button" asp-action="Import">Upload Another JSON</a>
+        @if (Model.Count > 0)
+        {
+            <form id="save-all-drafts" asp-action="SaveAllImported" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="primary">Save All</button>
+            </form>
+        }
+    </div>
+</section>
+
+@if (Model.Count == 0)
+{
+    <section class="panel">
+        <p class="muted">No import drafts are stored in this session.</p>
+    </section>
+}
+else
+{
+    <section class="draft-list">
+    @foreach (var draft in Model)
+    {
+        var saveFormId = $"save-draft-{draft.ImportIndex}";
+        <article class="panel draft-card">
+            <div class="draft-card-row">
+                <div class="draft-card-main">
+                    <div class="draft-title-row">
+                        <div>
+                            <h2>@draft.Title</h2>
+                            <p class="muted">#@draft.ImportIndex - @draft.Result - @draft.HeatLevel heat - @TimeSpan.FromSeconds(draft.DurationSeconds).ToString(@"mm\:ss")</p>
+                        </div>
+                        <span class="tag">@draft.Boons.Count boons</span>
+                    </div>
+
+                    <form id="@saveFormId" asp-action="SaveImported" method="post" class="draft-description-form">
+                        @Html.AntiForgeryToken()
+                        <input name="importIndex" type="hidden" value="@draft.ImportIndex" />
+                        <label>
+                            <span>Description</span>
+                            <textarea name="notes" maxlength="1000" placeholder="Add a short description before saving" data-draft-notes="@draft.ImportIndex">@draft.Notes</textarea>
+                        </label>
+                    </form>
+
+                    <details class="draft-details">
+                        <summary>Full run info</summary>
+
+                        <div class="grid-3 draft-stats">
+                            <div class="stat"><span>Weapon</span><strong>@(draft.WeaponName ?? "Unknown")</strong></div>
+                            <div class="stat"><span>Biome</span><strong>@draft.FinalBiome</strong></div>
+                            <div class="stat"><span>Boss</span><strong>@(draft.DefeatedBoss ?? "N/A")</strong></div>
+                            <div class="stat"><span>Played</span><strong>@draft.PlayedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</strong></div>
+                            <div class="stat"><span>Source</span><strong>@draft.Source</strong></div>
+                            <div class="stat"><span>Boons</span><strong>@draft.Boons.Count</strong></div>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Boon</th><th>God</th><th>Slot</th><th>Level</th><th>Core</th></tr></thead>
+                                <tbody>
+                                @foreach (var boon in draft.Boons)
+                                {
+                                    <tr>
+                                        <td>@boon.Name</td>
+                                        <td>@(boon.God ?? "Other")</td>
+                                        <td>@boon.SlotType</td>
+                                        <td>@boon.LevelUsed</td>
+                                        <td>@(boon.IsCoreBoon ? "Yes" : "No")</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <form asp-action="EditImported" method="post" class="draft-edit-form">
+                            @Html.AntiForgeryToken()
+                            <input name="importIndex" type="hidden" value="@draft.ImportIndex" />
+                            <button type="submit">Open full editor</button>
+                        </form>
+                    </details>
+                </div>
+
+                <div class="draft-quick-actions">
+                    <button form="@saveFormId" type="submit" class="primary">Save</button>
+                    <form asp-action="DeleteImported" method="post">
+                        @Html.AntiForgeryToken()
+                        <input name="importIndex" type="hidden" value="@draft.ImportIndex" />
+                        <button type="submit" class="danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+    }
+    </section>
+
+    <script>
+        (() => {
+            const form = document.getElementById("save-all-drafts");
+            if (!form) {
+                return;
+            }
+
+            form.addEventListener("submit", () => {
+                form.querySelectorAll("[data-generated-draft-note]").forEach(input => input.remove());
+                document.querySelectorAll("[data-draft-notes]").forEach(textarea => {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = `notes_${textarea.dataset.draftNotes}`;
+                    input.value = textarea.value;
+                    input.setAttribute("data-generated-draft-note", "true");
+                    form.appendChild(input);
+                });
+            });
+        })();
+    </script>
+}

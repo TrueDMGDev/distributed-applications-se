@@ -1,0 +1,445 @@
+@model RunFormViewModel
+@{
+    ViewData["Title"] = Model.FormTitle;
+}
+
+@functions {
+    private static string ExtractGod(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return "Other";
+        }
+
+        var open = text.LastIndexOf('(');
+        var close = text.LastIndexOf(')');
+        return open >= 0 && close > open ? text[(open + 1)..close] : "Other";
+    }
+
+    private static string ExtractBoonName(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        var suffixStart = text.LastIndexOf(" (", StringComparison.Ordinal);
+        return suffixStart > 0 && text.EndsWith(")", StringComparison.Ordinal)
+            ? text[..suffixStart]
+            : text;
+    }
+}
+
+<form asp-action="@(Model.Id.HasValue ? "Edit" : "Create")" asp-route-id="@Model.Id" method="post" class="run-editor">
+    @Html.AntiForgeryToken()
+    <input asp-for="ImportIndex" type="hidden" />
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <section class="run-result-board">
+        <div class="run-result-cap">House of Runs</div>
+        <label class="run-title-field">
+            <span>Run title</span>
+            <input asp-for="Run.Title" maxlength="120" />
+            <span asp-validation-for="Run.Title"></span>
+        </label>
+
+        <div class="run-result-controls">
+            <label>
+                <span>Result</span>
+                <select asp-for="Run.Result">
+                    <option>Escaped</option>
+                    <option>Died</option>
+                </select>
+                <span asp-validation-for="Run.Result"></span>
+            </label>
+            <label>
+                <span>Visibility</span>
+                <select asp-for="Run.IsPublic">
+                    <option value="true">Public</option>
+                    <option value="false">Private</option>
+                </select>
+            </label>
+        </div>
+    </section>
+
+    <section class="run-stat-ribbon">
+        <label class="ribbon-stat heat-stat">
+            <span>Heat</span>
+            <input asp-for="Run.HeatLevel" type="number" min="0" max="64" />
+            <span asp-validation-for="Run.HeatLevel"></span>
+        </label>
+        <label class="ribbon-stat">
+            <span>Clear time</span>
+            <input asp-for="Run.DurationSeconds" type="number" min="0" max="999999" />
+            <span asp-validation-for="Run.DurationSeconds"></span>
+        </label>
+        <label class="ribbon-stat">
+            <span>Final biome</span>
+            <select asp-for="Run.FinalBiome">
+                <option>Tartarus</option>
+                <option>Asphodel</option>
+                <option>Elysium</option>
+                <option>Temple of Styx</option>
+                <option>Greece</option>
+            </select>
+            <span asp-validation-for="Run.FinalBiome"></span>
+        </label>
+        <label class="ribbon-stat">
+            <span>Played at</span>
+            <input asp-for="Run.PlayedAt" type="datetime-local" />
+            <span asp-validation-for="Run.PlayedAt"></span>
+        </label>
+    </section>
+
+    <div class="run-editor-layout">
+        <section class="run-record-panel">
+            <div class="panel-heading">
+                <p class="eyebrow">Run record</p>
+                <h2>Escape Stats</h2>
+            </div>
+
+            <div class="record-grid">
+                <label class="wide">
+                    Weapon
+                    <select asp-for="Run.WeaponId" data-weapon-select>
+                        @foreach (var weapon in Model.WeaponOptions)
+                        {
+                            <option value="@weapon.Id"
+                                    selected="@(weapon.Id == Model.Run.WeaponId)"
+                                    data-weapon-type="@weapon.WeaponType"
+                                    data-icon="@weapon.IconPath">
+                                @weapon.DisplayName
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="Run.WeaponId"></span>
+                </label>
+                <label>
+                    Boss / death cause
+                    <input asp-for="Run.DefeatedBoss" maxlength="80" />
+                    <span asp-validation-for="Run.DefeatedBoss"></span>
+                </label>
+                <label>
+                    Source
+                    <input asp-for="Run.Source" type="hidden" />
+                    <input value="@Model.Run.Source" readonly disabled />
+                    <span asp-validation-for="Run.Source"></span>
+                </label>
+                <label class="wide">
+                    Screenshot URL
+                    <input asp-for="Run.ScreenshotUrl" maxlength="300" />
+                    <span asp-validation-for="Run.ScreenshotUrl"></span>
+                </label>
+                <label class="wide">
+                    Description
+                    <textarea asp-for="Run.Notes" maxlength="1000"></textarea>
+                    <span asp-validation-for="Run.Notes"></span>
+                </label>
+            </div>
+        </section>
+
+        <section class="boon-codex">
+            <div class="panel-heading boon-heading">
+                <div>
+                    <p class="eyebrow">Boons & upgrades</p>
+                    <h2>Build Screen</h2>
+                </div>
+                <div class="boon-heading-actions">
+                    <span class="tag" data-boon-count>@Model.BoonRows.Count slots</span>
+                    <button type="button" class="primary compact-button" data-add-boon-slot>Add slot</button>
+                </div>
+            </div>
+
+            <div class="boon-list" data-boon-list>
+                @for (var i = 0; i < Model.BoonRows.Count; i++)
+                {
+                    var boonValue = Model.BoonRows[i].BoonId == Guid.Empty ? string.Empty : Model.BoonRows[i].BoonId.ToString();
+                    var selectedBoon = Model.BoonOptions.FirstOrDefault(item => item.Id.ToString() == boonValue);
+                    var boonName = selectedBoon?.Name ?? string.Empty;
+                    var god = selectedBoon?.God ?? "Other";
+                    var iconPath = selectedBoon?.IconPath;
+                    <article class="boon-editor-row" data-boon-row>
+                        <div class="boon-gem @(iconPath is null ? string.Empty : "has-icon")" data-boon-icon data-god="@god">
+                            @if (iconPath is not null)
+                            {
+                                <img src="@iconPath" alt="" loading="lazy" onerror="this.remove(); this.parentElement.classList.remove('has-icon')" />
+                            }
+                            <span>@BoonIconLookup.Initial(god, boonName)</span>
+                        </div>
+
+                        <div class="boon-editor-fields">
+                            <div class="boon-row-actions">
+                                <span class="tag">Slot @(i + 1)</span>
+                                <button type="button" class="danger compact-button" data-remove-boon-slot>Delete slot</button>
+                            </div>
+
+                            <label class="wide">
+                                Boon
+                                <select id="BoonRows_@(i)__BoonId" name="BoonRows[@i].BoonId" data-boon-select>
+                                    <option value="">No boon</option>
+                                    @foreach (var boon in Model.BoonOptions)
+                                    {
+                                        <option value="@boon.Id"
+                                                selected="@(boon.Id.ToString() == boonValue)"
+                                                data-name="@boon.Name"
+                                                data-god="@boon.God"
+                                                data-effect-type="@boon.EffectType"
+                                                data-weapon-type="@boon.WeaponType"
+                                                data-icon="@boon.IconPath"
+                                                data-has-icon="@boon.HasIcon.ToString().ToLowerInvariant()">
+                                            @boon.DisplayName
+                                        </option>
+                                    }
+                                </select>
+                            </label>
+
+                            <div class="boon-field-grid">
+                                <label>
+                                    Slot
+                                    <input asp-for="BoonRows[i].SlotType" maxlength="50" />
+                                </label>
+                                <label>
+                                    Level
+                                    <input asp-for="BoonRows[i].LevelUsed" type="number" min="1" max="20" />
+                                </label>
+                                <label>
+                                    Pom
+                                    <input asp-for="BoonRows[i].PomLevel" type="number" min="0" max="20" />
+                                </label>
+                                <label>
+                                    Core
+                                    <select asp-for="BoonRows[i].IsCoreBoon">
+                                        <option value="false">No</option>
+                                        <option value="true">Yes</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <label class="wide">
+                                Notes
+                                <input asp-for="BoonRows[i].Notes" maxlength="300" />
+                            </label>
+                        </div>
+                    </article>
+                }
+            </div>
+
+            <template data-boon-template>
+                <article class="boon-editor-row" data-boon-row>
+                    <div class="boon-gem" data-boon-icon data-god="Other">
+                        <span>?</span>
+                    </div>
+
+                    <div class="boon-editor-fields">
+                        <div class="boon-row-actions">
+                            <span class="tag">Slot __number__</span>
+                            <button type="button" class="danger compact-button" data-remove-boon-slot>Delete slot</button>
+                        </div>
+
+                        <label class="wide">
+                            Boon
+                            <select id="BoonRows___index____BoonId" name="BoonRows[__index__].BoonId" data-boon-select>
+                                <option value="">No boon</option>
+                                @foreach (var boon in Model.BoonOptions)
+                                {
+                                    <option value="@boon.Id"
+                                            data-name="@boon.Name"
+                                            data-god="@boon.God"
+                                            data-effect-type="@boon.EffectType"
+                                            data-weapon-type="@boon.WeaponType"
+                                            data-icon="@boon.IconPath"
+                                            data-has-icon="@boon.HasIcon.ToString().ToLowerInvariant()">
+                                        @boon.DisplayName
+                                    </option>
+                                }
+                            </select>
+                        </label>
+
+                        <div class="boon-field-grid">
+                            <label>
+                                Slot
+                                <input id="BoonRows___index____SlotType" name="BoonRows[__index__].SlotType" maxlength="50" value="Build" />
+                            </label>
+                            <label>
+                                Level
+                                <input id="BoonRows___index____LevelUsed" name="BoonRows[__index__].LevelUsed" type="number" min="1" max="20" value="1" />
+                            </label>
+                            <label>
+                                Pom
+                                <input id="BoonRows___index____PomLevel" name="BoonRows[__index__].PomLevel" type="number" min="0" max="20" value="0" />
+                            </label>
+                            <label>
+                                Core
+                                <select id="BoonRows___index____IsCoreBoon" name="BoonRows[__index__].IsCoreBoon">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <label class="wide">
+                            Notes
+                            <input id="BoonRows___index____Notes" name="BoonRows[__index__].Notes" maxlength="300" />
+                        </label>
+                    </div>
+                </article>
+            </template>
+        </section>
+    </div>
+
+    <div class="editor-actions">
+        <button type="submit" class="primary">Save Run</button>
+        <a class="button" asp-action="Mine">Cancel</a>
+    </div>
+</form>
+
+<script>
+    (() => {
+        const initial = (god, boonName) => {
+            const source = god && god !== "Other" ? god : boonName;
+            return source ? source.slice(0, 1).toUpperCase() : "?";
+        };
+
+        const weaponSelect = document.querySelector("[data-weapon-select]");
+        const boonList = document.querySelector("[data-boon-list]");
+        const boonTemplate = document.querySelector("[data-boon-template]");
+        const addBoonSlot = document.querySelector("[data-add-boon-slot]");
+        const boonCount = document.querySelector("[data-boon-count]");
+
+        const selectedWeaponType = () => {
+            const option = weaponSelect ? weaponSelect.options[weaponSelect.selectedIndex] : null;
+            return option?.dataset.weaponType || "All";
+        };
+
+        const optionMatchesWeapon = (option, weaponType) => {
+            if (!option || !option.value || option.selected) {
+                return true;
+            }
+
+            const god = option.dataset.god || "";
+            const boonWeaponType = option.dataset.weaponType || "All";
+            return god !== "Daedalus" || boonWeaponType === "All" || boonWeaponType === weaponType;
+        };
+
+        const filterOptions = select => {
+            const weaponType = selectedWeaponType();
+            Array.from(select.options).forEach(option => {
+                const visible = optionMatchesWeapon(option, weaponType);
+                option.hidden = !visible;
+                option.disabled = !visible;
+            });
+        };
+
+        const syncIcon = select => {
+            const row = select.closest(".boon-editor-row");
+            const icon = row ? row.querySelector("[data-boon-icon]") : null;
+            if (!icon) {
+                return;
+            }
+
+            const option = select.options[select.selectedIndex];
+            const hasBoon = option && option.value;
+            const boonName = hasBoon ? option.dataset.name || "" : "";
+            const god = hasBoon ? option.dataset.god || "Other" : "Other";
+            const path = hasBoon ? option.dataset.icon || "" : "";
+            icon.dataset.god = god;
+
+            let image = icon.querySelector("img");
+            if (hasBoon && boonName && path) {
+                if (!image) {
+                    image = document.createElement("img");
+                    image.alt = "";
+                    image.loading = "lazy";
+                    icon.prepend(image);
+                }
+
+                image.onload = () => icon.classList.add("has-icon");
+                image.onerror = () => {
+                    icon.classList.remove("has-icon");
+                    image.remove();
+                };
+                image.src = path;
+                icon.classList.add("has-icon");
+            } else {
+                image?.remove();
+                icon.classList.remove("has-icon");
+            }
+
+            const label = icon.querySelector("span");
+            if (label) {
+                label.textContent = initial(god, boonName);
+            }
+        };
+
+        const updateCount = () => {
+            const count = boonList ? boonList.querySelectorAll("[data-boon-row]").length : 0;
+            if (boonCount) {
+                boonCount.textContent = `${count} ${count === 1 ? "slot" : "slots"}`;
+            }
+        };
+
+        const reindexRows = () => {
+            const rows = Array.from(boonList?.querySelectorAll("[data-boon-row]") || []);
+            rows.forEach((row, index) => {
+                const tag = row.querySelector(".boon-row-actions .tag");
+                if (tag) {
+                    tag.textContent = `Slot ${index + 1}`;
+                }
+
+                row.querySelectorAll("[name]").forEach(field => {
+                    field.name = field.name.replace(/BoonRows\[\d+\]/, `BoonRows[${index}]`);
+                });
+
+                row.querySelectorAll("[id]").forEach(field => {
+                    field.id = field.id.replace(/BoonRows_\d+__/, `BoonRows_${index}__`);
+                });
+            });
+            updateCount();
+        };
+
+        const wireSelect = select => {
+            filterOptions(select);
+            select.addEventListener("change", () => syncIcon(select));
+            syncIcon(select);
+        };
+
+        const wireRow = row => {
+            const select = row.querySelector("[data-boon-select]");
+            if (select) {
+                wireSelect(select);
+            }
+
+            row.querySelector("[data-remove-boon-slot]")?.addEventListener("click", () => {
+                row.remove();
+                reindexRows();
+            });
+        };
+
+        Array.from(document.querySelectorAll("[data-boon-row]")).forEach(wireRow);
+
+        addBoonSlot?.addEventListener("click", () => {
+            if (!boonList || !boonTemplate) {
+                return;
+            }
+
+            const index = boonList.querySelectorAll("[data-boon-row]").length;
+            const html = boonTemplate.innerHTML
+                .replaceAll("__index__", index.toString())
+                .replaceAll("__number__", (index + 1).toString());
+            boonList.insertAdjacentHTML("beforeend", html);
+
+            const row = boonList.lastElementChild;
+            if (row) {
+                wireRow(row);
+            }
+
+            reindexRows();
+        });
+
+        weaponSelect?.addEventListener("change", () => {
+            document.querySelectorAll("[data-boon-select]").forEach(filterOptions);
+        });
+
+        reindexRows();
+    })();
+</script>

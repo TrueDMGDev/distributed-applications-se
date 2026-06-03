@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);verify-build\**;**\verify-build\**;**\verify-build-obj\**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

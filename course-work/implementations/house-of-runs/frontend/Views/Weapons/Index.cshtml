@@ -1,0 +1,69 @@
+@model ListPageViewModel<WeaponResponse>
+@{
+    ViewData["Title"] = "Weapons";
+}
+
+<section class="hero">
+    <h1>Weapons</h1>
+    <p>CRUD page for Hades weapon and aspect records.</p>
+    <a class="button primary" asp-action="Create">Create Weapon</a>
+</section>
+
+<form asp-action="Index" method="get" class="panel filters">
+    <input name="q" maxlength="120" value="@Model.Q" placeholder="Search name or aspect" />
+    <input name="weaponType" maxlength="40" value="@Model.Filters.GetValueOrDefault("weaponType")" placeholder="Type" />
+    <select name="isUnlocked">
+        <option value="">Any unlock state</option>
+        <option value="true" selected="@(Model.Filters.GetValueOrDefault("isUnlocked") == "True")">Unlocked</option>
+        <option value="false" selected="@(Model.Filters.GetValueOrDefault("isUnlocked") == "False")">Locked</option>
+    </select>
+    <select name="sortBy">
+        <option value="name" selected="@(Model.SortBy == "name")">Name</option>
+        <option value="aspect" selected="@(Model.SortBy == "aspect")">Aspect</option>
+        <option value="type" selected="@(Model.SortBy == "type")">Type</option>
+        <option value="damage" selected="@(Model.SortBy == "damage")">Damage</option>
+    </select>
+    <select name="sortDir">
+        <option value="asc" selected="@(Model.SortDir == "asc")">Ascending</option>
+        <option value="desc" selected="@(Model.SortDir == "desc")">Descending</option>
+    </select>
+    <button type="submit" class="primary">Apply</button>
+</form>
+
+<section class="panel table-wrap">
+    <table>
+        <thead><tr><th>Name</th><th>Aspect</th><th>Type</th><th>Damage</th><th>Blood</th><th>Unlocked</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var weapon in Model.Page.Items)
+        {
+            <tr>
+                <td>@weapon.Name</td>
+                <td>@weapon.AspectName</td>
+                <td>@weapon.WeaponType</td>
+                <td>@weapon.BaseDamage</td>
+                <td>@weapon.TitanBloodLevel</td>
+                <td>@(weapon.IsUnlocked ? "Yes" : "No")</td>
+                <td class="actions">
+                    <a class="button" asp-action="Edit" asp-route-id="@weapon.Id">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@weapon.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>
+
+<div class="pagination panel">
+    @if (Model.Page.Page > 1)
+    {
+        <a class="button" asp-route-page="@(Model.Page.Page - 1)" asp-route-q="@Model.Q" asp-route-weaponType="@Model.Filters.GetValueOrDefault("weaponType")" asp-route-isUnlocked="@Model.Filters.GetValueOrDefault("isUnlocked")" asp-route-sortBy="@Model.SortBy" asp-route-sortDir="@Model.SortDir">Previous</a>
+    }
+    <span class="muted">Page @Model.Page.Page of @Math.Max(1, Model.Page.TotalPages)</span>
+    @if (Model.Page.Page < Model.Page.TotalPages)
+    {
+        <a class="button" asp-route-page="@(Model.Page.Page + 1)" asp-route-q="@Model.Q" asp-route-weaponType="@Model.Filters.GetValueOrDefault("weaponType")" asp-route-isUnlocked="@Model.Filters.GetValueOrDefault("isUnlocked")" asp-route-sortBy="@Model.SortBy" asp-route-sortDir="@Model.SortDir">Next</a>
+    }
+</div>

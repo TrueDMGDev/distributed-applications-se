@@ -1,0 +1,28 @@
+@model BoonRequest
+@{
+    ViewData["Title"] = "Boon Form";
+}
+
+<section class="hero">
+    <h1>Boon</h1>
+    <p>Create or edit boon metadata.</p>
+</section>
+
+<form method="post" class="panel">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="grid">
+        <label>Name<input asp-for="Name" maxlength="80" /><span asp-validation-for="Name"></span></label>
+        <label>God<input asp-for="God" maxlength="40" /><span asp-validation-for="God"></span></label>
+        <label>Effect type<input asp-for="EffectType" maxlength="50" /><span asp-validation-for="EffectType"></span></label>
+        <label>Level<input asp-for="Level" type="number" min="1" max="20" /><span asp-validation-for="Level"></span></label>
+        <label>Power scale<input asp-for="PowerScale" type="number" min="0" max="999" step="0.01" /><span asp-validation-for="PowerScale"></span></label>
+        <label>Duo<select asp-for="IsDuo"><option value="false">No</option><option value="true">Yes</option></select></label>
+        <label>Legendary<select asp-for="IsLegendary"><option value="false">No</option><option value="true">Yes</option></select></label>
+        <label class="wide">Description<textarea asp-for="Description" maxlength="600"></textarea><span asp-validation-for="Description"></span></label>
+    </div>
+    <div class="actions">
+        <button type="submit" class="primary">Save Boon</button>
+        <a class="button" asp-action="Index">Cancel</a>
+    </div>
+</form>

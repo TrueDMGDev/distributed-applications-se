@@ -1,0 +1,35 @@
+@model RunBoonFormViewModel
+@{
+    ViewData["Title"] = Model.FormTitle;
+}
+
+<section class="hero">
+    <h1>@Model.FormTitle</h1>
+    <p>Attach a boon to one of your runs.</p>
+</section>
+
+<form method="post" class="panel">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="grid">
+        <label class="wide">
+            Run
+            <select asp-for="RunBoon.RunId" asp-items="Model.Runs"></select>
+            <span asp-validation-for="RunBoon.RunId"></span>
+        </label>
+        <label class="wide">
+            Boon
+            <select asp-for="RunBoon.BoonId" asp-items="Model.Boons"></select>
+            <span asp-validation-for="RunBoon.BoonId"></span>
+        </label>
+        <label>Slot<input asp-for="RunBoon.SlotType" maxlength="50" /><span asp-validation-for="RunBoon.SlotType"></span></label>
+        <label>Level<input asp-for="RunBoon.LevelUsed" type="number" min="1" max="20" /><span asp-validation-for="RunBoon.LevelUsed"></span></label>
+        <label>Pom level<input asp-for="RunBoon.PomLevel" type="number" min="0" max="20" /></label>
+        <label>Core<select asp-for="RunBoon.IsCoreBoon"><option value="false">No</option><option value="true">Yes</option></select></label>
+        <label class="wide">Notes<textarea asp-for="RunBoon.Notes" maxlength="300"></textarea><span asp-validation-for="RunBoon.Notes"></span></label>
+    </div>
+    <div class="actions">
+        <button type="submit" class="primary">Save Run Boon</button>
+        <a class="button" asp-action="Index">Cancel</a>
+    </div>
+</form>

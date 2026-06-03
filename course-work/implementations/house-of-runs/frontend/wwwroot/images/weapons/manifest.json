@@ -1,0 +1,44 @@
+﻿[
+    {
+        "title":  "Adamant Rail.png",
+        "file":  "adamant-rail.png",
+        "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/36/Adamant_Rail.png/revision/latest?cb=20210120004027",
+        "mime":  "image/png",
+        "size":  62842
+    },
+    {
+        "title":  "Eternal Spear.png",
+        "file":  "eternal-spear.png",
+        "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/c/c1/Eternal_Spear.png/revision/latest?cb=20181214234725",
+        "mime":  "image/png",
+        "size":  65179
+    },
+    {
+        "title":  "Heart-Seeker Bow.png",
+        "file":  "heart-seeker-bow.png",
+        "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/5c/Heart-Seeker_Bow.png/revision/latest?cb=20181213193638",
+        "mime":  "image/png",
+        "size":  75516
+    },
+    {
+        "title":  "Shield of Chaos.png",
+        "file":  "shield-of-chaos.png",
+        "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/02/Shield_of_Chaos.png/revision/latest?cb=20181213193429",
+        "mime":  "image/png",
+        "size":  173385
+    },
+    {
+        "title":  "Stygian Blade.png",
+        "file":  "stygian-blade.png",
+        "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/f/f7/Stygian_Blade.png/revision/latest?cb=20181213044607",
+        "mime":  "image/png",
+        "size":  84740
+    },
+    {
+        "title":  "Twin Fists.png",
+        "file":  "twin-fists.png",
+        "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/08/Twin_Fists.png/revision/latest?cb=20200430070608",
+        "mime":  "image/png",
+        "size":  119558
+    }
+]

@@ -1,0 +1,28 @@
+@model WeaponRequest
+@{
+    ViewData["Title"] = "Weapon Form";
+}
+
+<section class="hero">
+    <h1>Weapon</h1>
+    <p>Create or edit a Hades weapon/aspect record.</p>
+</section>
+
+<form method="post" class="panel">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="grid">
+        <label>Name<input asp-for="Name" maxlength="60" /><span asp-validation-for="Name"></span></label>
+        <label>Aspect<input asp-for="AspectName" maxlength="60" /><span asp-validation-for="AspectName"></span></label>
+        <label>Type<input asp-for="WeaponType" maxlength="40" /><span asp-validation-for="WeaponType"></span></label>
+        <label>Titan blood level<input asp-for="TitanBloodLevel" type="number" min="0" max="5" /><span asp-validation-for="TitanBloodLevel"></span></label>
+        <label>Unlock cost<input asp-for="UnlockCost" type="number" min="0" max="25" /><span asp-validation-for="UnlockCost"></span></label>
+        <label>Base damage<input asp-for="BaseDamage" type="number" min="0" max="9999" step="0.01" /><span asp-validation-for="BaseDamage"></span></label>
+        <label>Unlocked<select asp-for="IsUnlocked"><option value="true">Yes</option><option value="false">No</option></select></label>
+        <label class="wide">Description<textarea asp-for="Description" maxlength="500"></textarea><span asp-validation-for="Description"></span></label>
+    </div>
+    <div class="actions">
+        <button type="submit" class="primary">Save Weapon</button>
+        <a class="button" asp-action="Index">Cancel</a>
+    </div>
+</form>

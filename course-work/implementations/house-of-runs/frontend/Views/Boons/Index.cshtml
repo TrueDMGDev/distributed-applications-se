@@ -1,0 +1,69 @@
+@model ListPageViewModel<BoonResponse>
+@{
+    ViewData["Title"] = "Boons";
+}
+
+<section class="hero">
+    <h1>Boons</h1>
+    <p>CRUD page for boon metadata used by run submissions.</p>
+    <a class="button primary" asp-action="Create">Create Boon</a>
+</section>
+
+<form asp-action="Index" method="get" class="panel filters">
+    <input name="q" maxlength="120" value="@Model.Q" placeholder="Search name or god" />
+    <input name="god" maxlength="40" value="@Model.Filters.GetValueOrDefault("god")" placeholder="God" />
+    <input name="effectType" maxlength="50" value="@Model.Filters.GetValueOrDefault("effectType")" placeholder="Effect type" />
+    <select name="isDuo">
+        <option value="">Any duo state</option>
+        <option value="true" selected="@(Model.Filters.GetValueOrDefault("isDuo") == "True")">Duo</option>
+        <option value="false" selected="@(Model.Filters.GetValueOrDefault("isDuo") == "False")">Not duo</option>
+    </select>
+    <select name="sortBy">
+        <option value="name" selected="@(Model.SortBy == "name")">Name</option>
+        <option value="god" selected="@(Model.SortBy == "god")">God</option>
+        <option value="level" selected="@(Model.SortBy == "level")">Level</option>
+    </select>
+    <select name="sortDir">
+        <option value="asc" selected="@(Model.SortDir == "asc")">Ascending</option>
+        <option value="desc" selected="@(Model.SortDir == "desc")">Descending</option>
+    </select>
+    <button type="submit" class="primary">Apply</button>
+</form>
+
+<section class="panel table-wrap">
+    <table>
+        <thead><tr><th>Name</th><th>God</th><th>Type</th><th>Level</th><th>Duo</th><th>Legendary</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var boon in Model.Page.Items)
+        {
+            <tr>
+                <td>@boon.Name</td>
+                <td>@boon.God</td>
+                <td>@boon.EffectType</td>
+                <td>@boon.Level</td>
+                <td>@(boon.IsDuo ? "Yes" : "No")</td>
+                <td>@(boon.IsLegendary ? "Yes" : "No")</td>
+                <td class="actions">
+                    <a class="button" asp-action="Edit" asp-route-id="@boon.Id">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@boon.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>
+
+<div class="pagination panel">
+    @if (Model.Page.Page > 1)
+    {
+        <a class="button" asp-route-page="@(Model.Page.Page - 1)" asp-route-q="@Model.Q" asp-route-god="@Model.Filters.GetValueOrDefault("god")" asp-route-effectType="@Model.Filters.GetValueOrDefault("effectType")" asp-route-isDuo="@Model.Filters.GetValueOrDefault("isDuo")" asp-route-sortBy="@Model.SortBy" asp-route-sortDir="@Model.SortDir">Previous</a>
+    }
+    <span class="muted">Page @Model.Page.Page of @Math.Max(1, Model.Page.TotalPages)</span>
+    @if (Model.Page.Page < Model.Page.TotalPages)
+    {
+        <a class="button" asp-route-page="@(Model.Page.Page + 1)" asp-route-q="@Model.Q" asp-route-god="@Model.Filters.GetValueOrDefault("god")" asp-route-effectType="@Model.Filters.GetValueOrDefault("effectType")" asp-route-isDuo="@Model.Filters.GetValueOrDefault("isDuo")" asp-route-sortBy="@Model.SortBy" asp-route-sortDir="@Model.SortDir">Next</a>
+    }
+</div>

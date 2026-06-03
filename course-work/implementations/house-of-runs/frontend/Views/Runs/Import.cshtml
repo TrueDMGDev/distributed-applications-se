@@ -1,0 +1,69 @@
+@{
+    ViewData["Title"] = "Upload Run JSON";
+}
+
+<section class="hero">
+    <h1>Upload Run JSON</h1>
+    <p>Turn your ExportRunHistory output into reviewable House of Runs drafts.</p>
+</section>
+
+<form asp-action="Import" method="post" enctype="multipart/form-data" class="panel import-uploader">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="upload-card">
+        <label class="file-drop" id="runFileDrop">
+            <input id="runFileInput" name="file" type="file" accept=".json,application/json" />
+            <span class="eyebrow">ExportRunHistory</span>
+            <strong>Drop output.json here</strong>
+            <small>or click anywhere in this area to choose a JSON file</small>
+            <span class="upload-chip" id="runFileName">No file selected</span>
+        </label>
+
+        <aside class="upload-side">
+            <div>
+                <p class="eyebrow">Draft mode</p>
+                <h2>Import run history</h2>
+                <p class="muted">Leave the count blank to generate drafts for every run in the file.</p>
+            </div>
+
+            <label class="index-field">
+                <span>Latest runs</span>
+                <input name="runIndex" type="number" min="1" placeholder="All" />
+            </label>
+
+            <button type="submit" class="primary">Generate Drafts</button>
+        </aside>
+    </div>
+</form>
+
+<script>
+    (() => {
+        const input = document.getElementById("runFileInput");
+        const drop = document.getElementById("runFileDrop");
+        const name = document.getElementById("runFileName");
+
+        if (!input || !drop || !name) {
+            return;
+        }
+
+        const updateName = () => {
+            const file = input.files && input.files.length > 0 ? input.files[0] : null;
+            name.textContent = file ? file.name : "No file selected";
+            drop.classList.toggle("has-file", Boolean(file));
+        };
+
+        input.addEventListener("change", updateName);
+
+        ["dragenter", "dragover"].forEach(eventName => {
+            drop.addEventListener(eventName, () => drop.classList.add("is-dragging"));
+        });
+
+        ["dragleave", "drop"].forEach(eventName => {
+            drop.addEventListener(eventName, () => {
+                drop.classList.remove("is-dragging");
+                window.setTimeout(updateName, 0);
+            });
+        });
+    })();
+</script>

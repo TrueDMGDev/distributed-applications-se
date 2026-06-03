@@ -1,0 +1,87 @@
+@model RunResponse
+@{
+    ViewData["Title"] = Model.Title;
+    var weaponIconPath = BoonIconLookup.GetWeaponIconPath(Model.WeaponName, Model.AspectName);
+    var aspectIconPath = BoonIconLookup.GetAspectIconPath(Model.AspectName);
+}
+
+<section class="hero run-detail-hero">
+    <div class="run-detail-title">
+        <p class="muted">@Model.DisplayName - @Model.PlayedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+        <h1>@Model.Title</h1>
+        <p><strong>@Model.WeaponName</strong> / @Model.AspectName</p>
+    </div>
+    <div class="run-detail-weapon" title="@Model.WeaponName - @Model.AspectName">
+        @if (weaponIconPath is not null)
+        {
+            <img class="run-detail-weapon-image" src="@weaponIconPath" alt="" loading="lazy" onerror="this.remove()" />
+        }
+        <div>
+            <span>Weapon</span>
+            <strong>@Model.WeaponName</strong>
+            <small>@Model.AspectName</small>
+        </div>
+        @if (aspectIconPath is not null)
+        {
+            <img class="run-detail-aspect-image" src="@aspectIconPath" alt="" loading="lazy" onerror="this.remove()" />
+        }
+    </div>
+</section>
+
+<section class="panel grid-3">
+    <div class="stat"><span>Heat</span><strong>@Model.HeatLevel</strong></div>
+    <div class="stat"><span>Duration</span><strong>@TimeSpan.FromSeconds(Model.DurationSeconds).ToString(@"mm\:ss")</strong></div>
+    <div class="stat"><span>Result</span><strong>@Model.Result</strong></div>
+    <div class="stat"><span>Biome</span><strong>@Model.FinalBiome</strong></div>
+    <div class="stat"><span>Boss</span><strong>@(Model.DefeatedBoss ?? "N/A")</strong></div>
+    <div class="stat"><span>Visibility</span><strong>@(Model.IsPublic ? "Public" : "Private")</strong></div>
+</section>
+
+<section class="panel">
+    <h2>Notes</h2>
+    <p>@RunTextFormatter.CompactNotes(Model.Notes)</p>
+    @if (!string.IsNullOrWhiteSpace(Model.ScreenshotUrl))
+    {
+        <p><a href="@Model.ScreenshotUrl">Screenshot</a></p>
+    }
+</section>
+
+<section class="panel table-wrap">
+    <h2>Boons</h2>
+    <table>
+        <thead><tr><th>Boon</th><th>God</th><th>Slot</th><th>Level</th><th>Core</th></tr></thead>
+        <tbody>
+        @foreach (var boon in Model.Boons)
+        {
+            var iconPath = BoonIconLookup.GetIconPath(boon.BoonName, boon.God, boon.SlotType);
+            var godSymbolPath = BoonIconLookup.GetGodSymbolPath(boon.God);
+            <tr>
+                <td>
+                    <span class="boon-table-name">
+                        <span class="boon-token boon-token-small" data-god="@boon.God" title="@boon.BoonName">
+                            @if (iconPath is not null)
+                            {
+                                <img src="@iconPath" alt="" loading="lazy" onerror="this.remove()" />
+                            }
+                            <span>@BoonIconLookup.Initial(boon.God, boon.BoonName)</span>
+                        </span>
+                        @boon.BoonName
+                    </span>
+                </td>
+                <td>
+                    <span class="god-cell">
+                        @if (godSymbolPath is not null)
+                        {
+                            <img src="@godSymbolPath" alt="" loading="lazy" onerror="this.remove()" />
+                        }
+                        @boon.God
+                    </span>
+                </td>
+                <td>@boon.SlotType</td>
+                <td>@boon.LevelUsed</td>
+                <td>@(boon.IsCoreBoon ? "Yes" : "No")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>

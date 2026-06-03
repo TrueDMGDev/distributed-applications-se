@@ -1,0 +1,230 @@
+@model ListPageViewModel<RunResponse>
+@{
+    ViewData["Title"] = ViewBag.Title ?? "Runs";
+    var action = (bool)(ViewBag.MineOnly ?? false) ? "Mine" : "Index";
+    var canManageRuns = (bool)(ViewBag.CanManageRuns ?? false);
+    var isPublicHome = (bool)(ViewBag.IsPublicHome ?? false);
+    var currentUserId = ViewBag.CurrentUserId as Guid?;
+    var isAdmin = (bool)(ViewBag.IsAdmin ?? false);
+}
+
+<section class="hero">
+    <h1>@ViewData["Title"]</h1>
+    <p>@(isPublicHome ? "Fresh public runs from the House." : "Your saved Hades runs.")</p>
+    <div class="actions">
+        @if (isPublicHome)
+        {
+            <a class="button primary" asp-action="Mine">Upload Run</a>
+        }
+        else if (Model.Page.TotalCount > 0)
+        {
+            <a class="button primary" asp-action="Create">Create Run</a>
+            <a class="button" asp-action="Import">Import JSON</a>
+        }
+    </div>
+</section>
+
+@if (!isPublicHome && Model.Page.TotalCount == 0)
+{
+    <section class="panel empty-state">
+        <h2>No runs added</h2>
+        <p class="muted">Start with a manual entry or import your Hades run history JSON.</p>
+        <div class="actions">
+            <a class="button primary" asp-action="Create">Create Run</a>
+            <a class="button" asp-action="Import">Import JSON</a>
+        </div>
+    </section>
+}
+else
+{
+<form asp-action="@action" method="get" class="panel filters run-filters">
+    <label class="filter-search">
+        <span>Search</span>
+        <input name="q" maxlength="120" value="@Model.Q" placeholder="Title, notes, user, weapon" />
+    </label>
+    <div class="filter-grid">
+        <label>
+            <span>Result</span>
+            <select name="result">
+                <option value="">Any result</option>
+                <option value="Escaped" selected="@(Model.Filters.GetValueOrDefault("result") == "Escaped")">Escaped</option>
+                <option value="Died" selected="@(Model.Filters.GetValueOrDefault("result") == "Died")">Died</option>
+            </select>
+        </label>
+        <label>
+            <span>Biome</span>
+            <select name="finalBiome">
+                <option value="">Any biome</option>
+                <option value="Tartarus" selected="@(Model.Filters.GetValueOrDefault("finalBiome") == "Tartarus")">Tartarus</option>
+                <option value="Asphodel" selected="@(Model.Filters.GetValueOrDefault("finalBiome") == "Asphodel")">Asphodel</option>
+                <option value="Elysium" selected="@(Model.Filters.GetValueOrDefault("finalBiome") == "Elysium")">Elysium</option>
+                <option value="Temple of Styx" selected="@(Model.Filters.GetValueOrDefault("finalBiome") == "Temple of Styx")">Temple of Styx</option>
+                <option value="Greece" selected="@(Model.Filters.GetValueOrDefault("finalBiome") == "Greece")">Greece</option>
+            </select>
+        </label>
+        <fieldset class="heat-range">
+            <legend>Heat</legend>
+            <input name="minHeat" type="number" min="0" max="64" value="@Model.Filters.GetValueOrDefault("minHeat")" placeholder="Min" aria-label="Minimum heat" />
+            <input name="maxHeat" type="number" min="0" max="64" value="@Model.Filters.GetValueOrDefault("maxHeat")" placeholder="Max" aria-label="Maximum heat" />
+        </fieldset>
+        <fieldset class="sort-pair">
+            <legend>Sort</legend>
+            <select name="sortBy" aria-label="Sort by">
+                <option value="playedAt" selected="@(Model.SortBy == "playedAt")">Played date</option>
+                <option value="heat" selected="@(Model.SortBy == "heat")">Heat</option>
+                <option value="duration" selected="@(Model.SortBy == "duration")">Duration</option>
+                @if (isPublicHome)
+                {
+                    <option value="likes" selected="@(Model.SortBy == "likes")">Likes</option>
+                }
+                <option value="title" selected="@(Model.SortBy == "title")">Title</option>
+            </select>
+            <select name="sortDir" aria-label="Sort direction">
+                <option value="desc" selected="@(Model.SortDir == "desc")">Descending</option>
+                <option value="asc" selected="@(Model.SortDir == "asc")">Ascending</option>
+            </select>
+        </fieldset>
+        <div class="filter-actions">
+            <button type="submit" class="primary">Apply</button>
+            <a class="button" asp-action="@action">Clear</a>
+        </div>
+    </div>
+</form>
+
+<section class="feed">
+@foreach (var run in Model.Page.Items)
+{
+    var boonPreview = run.Boons.Take(10).ToList();
+    var remainingBoons = Math.Max(0, run.Boons.Count - boonPreview.Count);
+    var notes = RunTextFormatter.CompactNotes(run.Notes);
+    var weaponIconPath = BoonIconLookup.GetWeaponIconPath(run.WeaponName, run.AspectName);
+    var aspectIconPath = BoonIconLookup.GetAspectIconPath(run.AspectName);
+    <article class="run-card build-run-card">
+        <header class="run-card-header">
+            <div class="run-card-identity">
+                <span class="weapon-thumb" title="@run.WeaponName - @run.AspectName">
+                    @if (weaponIconPath is not null)
+                    {
+                        <img src="@weaponIconPath" alt="" loading="lazy" onerror="this.remove()" />
+                    }
+                    @if (aspectIconPath is not null)
+                    {
+                        <img class="aspect-thumb" src="@aspectIconPath" alt="" loading="lazy" onerror="this.remove()" />
+                    }
+                </span>
+                <div class="run-card-title-block">
+                    <p class="muted run-card-byline">by <strong>@run.UserName</strong> - @run.PlayedAt.ToLocalTime().ToString("yyyy-MM-dd")</p>
+                    <h2>@run.Title</h2>
+                    <p class="muted run-card-weapon"><strong>@run.WeaponName</strong> / @run.AspectName</p>
+                </div>
+            </div>
+            <span class="tag result-pill">@run.Result</span>
+        </header>
+        <div class="stats">
+            <div class="stat"><span>Heat</span><strong>@run.HeatLevel</strong></div>
+            <div class="stat"><span>Time</span><strong>@TimeSpan.FromSeconds(run.DurationSeconds).ToString(@"mm\:ss")</strong></div>
+            <div class="stat"><span>@(isPublicHome ? "Likes" : "Visibility")</span><strong>@(isPublicHome ? run.LikeCount.ToString() : (run.IsPublic ? "Public" : "Private"))</strong></div>
+        </div>
+        <div class="tags">
+            <span class="tag">@run.FinalBiome</span>
+            <span class="tag">@run.Source</span>
+            <span class="tag">@run.CommentCount comments</span>
+        </div>
+        <p class="run-card-notes">@notes</p>
+
+        <div class="run-build-preview">
+            <div class="boon-icon-stack" aria-label="Run boons">
+                @if (boonPreview.Count == 0)
+                {
+                    <span class="empty-build">No boons logged</span>
+                }
+                @foreach (var boon in boonPreview)
+                {
+                    var iconPath = BoonIconLookup.GetIconPath(boon.BoonName, boon.God, boon.SlotType);
+                    <span class="boon-token" data-god="@boon.God" title="@boon.BoonName - @boon.God">
+                        @if (iconPath is not null)
+                        {
+                            <img src="@iconPath" alt="" loading="lazy" onerror="this.remove()" />
+                        }
+                        <span>@BoonIconLookup.Initial(boon.God, boon.BoonName)</span>
+                    </span>
+                }
+                @if (remainingBoons > 0)
+                {
+                    <span class="boon-token boon-token-more" title="@remainingBoons more boons"><span>+@remainingBoons</span></span>
+                }
+            </div>
+            <div class="build-caption">
+                <strong>@run.Boons.Count @(run.Boons.Count == 1 ? "boon" : "boons")</strong>
+                <span>@(boonPreview.FirstOrDefault()?.BoonName ?? "Build not logged yet")</span>
+            </div>
+        </div>
+
+        @if (isPublicHome)
+        {
+            <div class="social-row">
+                @if (run.HasLiked)
+                {
+                    <form asp-action="Unlike" asp-route-id="@run.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit">Unlike</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="Like" asp-route-id="@run.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="primary">Like</button>
+                    </form>
+                }
+                <span class="muted">@run.LikeCount @(run.LikeCount == 1 ? "like" : "likes")</span>
+            </div>
+            <div class="comments">
+                @foreach (var comment in run.RecentComments)
+                {
+                    var canDeleteComment = isAdmin || comment.UserId == currentUserId || run.UserId == currentUserId;
+                    <div class="comment-item">
+                        <p><strong>@comment.UserName</strong>: @comment.Body</p>
+                        @if (canDeleteComment)
+                        {
+                            <form asp-action="DeleteComment" asp-route-id="@run.Id" asp-route-commentId="@comment.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="danger compact-button">Delete</button>
+                            </form>
+                        }
+                    </div>
+                }
+            </div>
+            <form asp-action="Comment" asp-route-id="@run.Id" method="post" class="comment-form">
+                @Html.AntiForgeryToken()
+                <input name="Body" maxlength="500" placeholder="Add a comment" />
+                <button type="submit">Post</button>
+            </form>
+        }
+        <div class="actions">
+            <a class="button" asp-action="Details" asp-route-id="@run.Id">Details</a>
+            @if (canManageRuns)
+            {
+                <a class="button" asp-action="Edit" asp-route-id="@run.Id">Edit</a>
+                <form asp-action="Delete" asp-route-id="@run.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="danger">Delete</button>
+                </form>
+            }
+        </div>
+    </article>
+}
+</section>
+
+<div class="pagination panel">
+    @if (Model.Page.Page > 1)
+    {
+        <a class="button" asp-action="@action" asp-route-page="@(Model.Page.Page - 1)" asp-route-q="@Model.Q" asp-route-result="@Model.Filters.GetValueOrDefault("result")" asp-route-finalBiome="@Model.Filters.GetValueOrDefault("finalBiome")" asp-route-minHeat="@Model.Filters.GetValueOrDefault("minHeat")" asp-route-maxHeat="@Model.Filters.GetValueOrDefault("maxHeat")" asp-route-sortBy="@Model.SortBy" asp-route-sortDir="@Model.SortDir">Previous</a>
+    }
+    <span class="muted">Page @Model.Page.Page of @Math.Max(1, Model.Page.TotalPages) - @Model.Page.TotalCount total</span>
+    @if (Model.Page.Page < Model.Page.TotalPages)
+    {
+        <a class="button" asp-action="@action" asp-route-page="@(Model.Page.Page + 1)" asp-route-q="@Model.Q" asp-route-result="@Model.Filters.GetValueOrDefault("result")" asp-route-finalBiome="@Model.Filters.GetValueOrDefault("finalBiome")" asp-route-minHeat="@Model.Filters.GetValueOrDefault("minHeat")" asp-route-maxHeat="@Model.Filters.GetValueOrDefault("maxHeat")" asp-route-sortBy="@Model.SortBy" asp-route-sortDir="@Model.SortDir">Next</a>
+    }
+</div>
+}

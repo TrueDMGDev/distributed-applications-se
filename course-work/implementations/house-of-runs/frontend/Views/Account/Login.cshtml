@@ -1,0 +1,33 @@
+@model LoginRequest
+@{
+    ViewData["Title"] = "Login";
+}
+
+<section class="hero">
+    <p class="muted">House of Runs</p>
+    <h1>Track your escape attempts.</h1>
+    <p>Server-rendered frontend for browsing, importing, and saving Hades runs.</p>
+</section>
+
+<form asp-action="Login" method="post" class="auth-card">
+    @Html.AntiForgeryToken()
+    <h2>Login</h2>
+    <div asp-validation-summary="ModelOnly"></div>
+    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+    <div class="grid">
+        <label class="wide">
+            Email or username
+            <input asp-for="EmailOrUserName" maxlength="120" />
+            <span asp-validation-for="EmailOrUserName"></span>
+        </label>
+        <label class="wide">
+            Password
+            <input asp-for="Password" type="password" maxlength="80" value="demo1234" />
+            <span asp-validation-for="Password"></span>
+        </label>
+    </div>
+    <div class="actions">
+        <button type="submit" class="primary">Login</button>
+        <a class="button" asp-action="Register">Register</a>
+    </div>
+</form>

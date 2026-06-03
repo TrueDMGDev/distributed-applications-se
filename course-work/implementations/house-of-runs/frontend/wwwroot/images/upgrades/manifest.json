@@ -1,0 +1,658 @@
+﻿[
+    {
+        "title":  "Achilles Aspect.png",
+        "file":  "achilles-aspect.png",
+        "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/b9/Achilles_Aspect.png/revision/latest?cb=20191013212233",
+        "mime":  "image/png",
+        "size":  12858
+    },
+    {
+        "value":  [
+                      {
+                          "title":  "Armor Shredder.png",
+                          "file":  "armor-shredder.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/1c/Armor_Shredder.png/revision/latest?cb=20181230011111",
+                          "mime":  "image/png",
+                          "size":  15939
+                      },
+                      {
+                          "title":  "Armor Skewer.png",
+                          "file":  "armor-skewer.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/bd/Armor_Skewer.png/revision/latest?cb=20181217032915",
+                          "mime":  "image/png",
+                          "size":  14366
+                      },
+                      {
+                          "title":  "Armor Slayer.png",
+                          "file":  "armor-slayer.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/ba/Armor_Slayer.png/revision/latest?cb=20181214233054",
+                          "mime":  "image/png",
+                          "size":  15481
+                      },
+                      {
+                          "title":  "Bow Chain Shot.png",
+                          "file":  "bow-chain-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/6a/Bow_Chain_Shot.png/revision/latest?cb=20200723134802",
+                          "mime":  "image/png",
+                          "size":  27289
+                      },
+                      {
+                          "title":  "Bow Charged Volley.png",
+                          "file":  "bow-charged-volley.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/2f/Bow_Charged_Volley.png/revision/latest?cb=20200723134232",
+                          "mime":  "image/png",
+                          "size":  27011
+                      },
+                      {
+                          "title":  "Bow Concentrated Volley.png",
+                          "file":  "bow-concentrated-volley.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/01/Bow_Concentrated_Volley.png/revision/latest?cb=20200723135352",
+                          "mime":  "image/png",
+                          "size":  28446
+                      },
+                      {
+                          "title":  "Bow Point-Blank Shot.png",
+                          "file":  "bow-point-blank-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/84/Bow_Point-Blank_Shot.png/revision/latest?cb=20200723134933",
+                          "mime":  "image/png",
+                          "size":  25041
+                      },
+                      {
+                          "title":  "Bow Rama Repulse Shot.png",
+                          "file":  "bow-rama-repulse-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/c/ce/Bow_Rama_Repulse_Shot.png/revision/latest?cb=20200723135229",
+                          "mime":  "image/png",
+                          "size":  25856
+                      },
+                      {
+                          "title":  "Breaching Cross.png",
+                          "file":  "breaching-cross.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/b1/Breaching_Cross.png/revision/latest?cb=20201007154858",
+                          "mime":  "image/png",
+                          "size":  29491
+                      },
+                      {
+                          "title":  "Charged Flight.png",
+                          "file":  "charged-flight.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/d/d1/Charged_Flight.png/revision/latest?cb=20201007161353",
+                          "mime":  "image/png",
+                          "size":  22322
+                      },
+                      {
+                          "title":  "Charged Shot.png",
+                          "file":  "charged-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/7/7e/Charged_Shot.png/revision/latest?cb=20200105153719",
+                          "mime":  "image/png",
+                          "size":  30784
+                      },
+                      {
+                          "title":  "Cluster Bomb.png",
+                          "file":  "cluster-bomb.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/d/d6/Cluster_Bomb.png/revision/latest?cb=20190223165152",
+                          "mime":  "image/png",
+                          "size":  26107
+                      },
+                      {
+                          "title":  "Colossus Knuckle.png",
+                          "file":  "colossus-knuckle.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/f/f5/Colossus_Knuckle.png/revision/latest?cb=20201007152438",
+                          "mime":  "image/png",
+                          "size":  27584
+                      },
+                      {
+                          "title":  "Concentrated Beam.png",
+                          "file":  "concentrated-beam.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/f/ff/Concentrated_Beam.png/revision/latest?cb=20201007151016",
+                          "mime":  "image/png",
+                          "size":  26967
+                      },
+                      {
+                          "title":  "Concentrated Fire.png",
+                          "file":  "concentrated-fire.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/1d/Concentrated_Fire.png/revision/latest?cb=20201007142505",
+                          "mime":  "image/png",
+                          "size":  23424
+                      },
+                      {
+                          "title":  "Concentrated Knuckle.png",
+                          "file":  "concentrated-knuckle.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/b9/Concentrated_Knuckle.png/revision/latest?cb=20201007154626",
+                          "mime":  "image/png",
+                          "size":  29576
+                      },
+                      {
+                          "title":  "Cooling Chamber.png",
+                          "file":  "cooling-chamber.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/22/Cooling_Chamber.png/revision/latest?cb=20190223164934",
+                          "mime":  "image/png",
+                          "size":  23192
+                      },
+                      {
+                          "title":  "Cruel Thrust.png",
+                          "file":  "cruel-thrust.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/a/a2/Cruel_Thrust.png/revision/latest?cb=20181214015845",
+                          "mime":  "image/png",
+                          "size":  27612
+                      },
+                      {
+                          "title":  "Cursed Slash.png",
+                          "file":  "cursed-slash.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/30/Cursed_Slash.png/revision/latest?cb=20200128222232",
+                          "mime":  "image/png",
+                          "size":  25890
+                      },
+                      {
+                          "title":  "Dashing Flight.png",
+                          "file":  "dashing-flight.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/c/ca/Dashing_Flight.png/revision/latest?cb=20201007161529",
+                          "mime":  "image/png",
+                          "size":  24669
+                      },
+                      {
+                          "title":  "Dashing Wallop.png",
+                          "file":  "dashing-wallop.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/3d/Dashing_Wallop.png/revision/latest?cb=20181230212836",
+                          "mime":  "image/png",
+                          "size":  15932
+                      },
+                      {
+                          "title":  "Double Edge.png",
+                          "file":  "double-edge.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/d/dd/Double_Edge.png/revision/latest?cb=20181214040753",
+                          "mime":  "image/png",
+                          "size":  13385
+                      },
+                      {
+                          "title":  "Draining Cutter.png",
+                          "file":  "draining-cutter.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/12/Draining_Cutter.png/revision/latest?cb=20201007154733",
+                          "mime":  "image/png",
+                          "size":  22842
+                      },
+                      {
+                          "title":  "Dread Flight.png",
+                          "file":  "dread-flight.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/0c/Dread_Flight.png/revision/latest?cb=20181230000217",
+                          "mime":  "image/png",
+                          "size":  14417
+                      },
+                      {
+                          "title":  "Empowering Flight.png",
+                          "file":  "empowering-flight.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/85/Empowering_Flight.png/revision/latest?cb=20201007161444",
+                          "mime":  "image/png",
+                          "size":  24675
+                      },
+                      {
+                          "title":  "Empowering Nova.png",
+                          "file":  "empowering-nova.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/7/77/Empowering_Nova.png/revision/latest?cb=20181216011311",
+                          "mime":  "image/png",
+                          "size":  15592
+                      },
+                      {
+                          "title":  "Eternal Chamber.png",
+                          "file":  "eternal-chamber.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/c/c4/Eternal_Chamber.png/revision/latest?cb=20201007151602",
+                          "mime":  "image/png",
+                          "size":  22504
+                      },
+                      {
+                          "title":  "Exploding Launcher.png",
+                          "file":  "exploding-launcher.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/5d/Exploding_Launcher.png/revision/latest?cb=20181217033057",
+                          "mime":  "image/png",
+                          "size":  15225
+                      },
+                      {
+                          "title":  "Explosive Fire.png",
+                          "file":  "explosive-fire.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/b5/Explosive_Fire.png/revision/latest?cb=20190512205351",
+                          "mime":  "image/png",
+                          "size":  34746
+                      },
+                      {
+                          "title":  "Explosive Return.png",
+                          "file":  "explosive-return.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/d/d0/Explosive_Return.png/revision/latest?cb=20181230000642",
+                          "mime":  "image/png",
+                          "size":  16196
+                      },
+                      {
+                          "title":  "Explosive Shot.png",
+                          "file":  "explosive-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/87/Explosive_Shot.png/revision/latest?cb=20181216013648",
+                          "mime":  "image/png",
+                          "size":  13223
+                      },
+                      {
+                          "title":  "Explosive Upper.png",
+                          "file":  "explosive-upper.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/38/Explosive_Upper.png/revision/latest?cb=20201007154515",
+                          "mime":  "image/png",
+                          "size":  30482
+                      },
+                      {
+                          "title":  "Extended Jab.png",
+                          "file":  "extended-jab.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/d/dc/Extended_Jab.png/revision/latest?cb=20181217033735",
+                          "mime":  "image/png",
+                          "size":  15970
+                      },
+                      {
+                          "title":  "Ferocious Guard.png",
+                          "file":  "ferocious-guard.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/3a/Ferocious_Guard.png/revision/latest?cb=20201007161630",
+                          "mime":  "image/png",
+                          "size":  32336
+                      },
+                      {
+                          "title":  "Flash Fire.png",
+                          "file":  "flash-fire.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/30/Flash_Fire.png/revision/latest?cb=20201007151444",
+                          "mime":  "image/png",
+                          "size":  22521
+                      },
+                      {
+                          "title":  "Flurry Blade.png",
+                          "file":  "flurry-blade.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/7/79/Flurry_Blade.png/revision/latest?cb=20181217042616",
+                          "mime":  "image/png",
+                          "size":  14353
+                      },
+                      {
+                          "title":  "Flurry Fire.png",
+                          "file":  "flurry-fire.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/9/94/Flurry_Fire.png/revision/latest?cb=20190223164842",
+                          "mime":  "image/png",
+                          "size":  30124
+                      },
+                      {
+                          "title":  "Flurry Jab.png",
+                          "file":  "flurry-jab.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/e/e5/Flurry_Jab.png/revision/latest?cb=20190223161941",
+                          "mime":  "image/png",
+                          "size":  30548
+                      },
+                      {
+                          "title":  "Flurry Shot.png",
+                          "file":  "flurry-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/bb/Flurry_Shot.png/revision/latest?cb=20201007160446",
+                          "mime":  "image/png",
+                          "size":  23857
+                      },
+                      {
+                          "title":  "Flying Cutter.png",
+                          "file":  "flying-cutter.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/4c/Flying_Cutter.png/revision/latest?cb=20201007154045",
+                          "mime":  "image/png",
+                          "size":  25056
+                      },
+                      {
+                          "title":  "Greater Inferno.png",
+                          "file":  "greater-inferno.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/8c/Greater_Inferno.png/revision/latest?cb=20201007151635",
+                          "mime":  "image/png",
+                          "size":  25318
+                      },
+                      {
+                          "title":  "Hazard Bomb.png",
+                          "file":  "hazard-bomb.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/05/Hazard_Bomb.png/revision/latest?cb=20201007150632",
+                          "mime":  "image/png",
+                          "size":  25501
+                      },
+                      {
+                          "title":  "Heavy Knuckle.png",
+                          "file":  "heavy-knuckle.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/8a/Heavy_Knuckle.png/revision/latest?cb=20201007152532",
+                          "mime":  "image/png",
+                          "size":  24416
+                      },
+                      {
+                          "title":  "Heavy Slug.png",
+                          "file":  "heavy-slug.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/be/Heavy_Slug.png/revision/latest?cb=20190512205238",
+                          "mime":  "image/png",
+                          "size":  36074
+                      },
+                      {
+                          "title":  "Inescapable Blast.png",
+                          "file":  "inescapable-blast.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/2c/Inescapable_Blast.png/revision/latest?cb=20200105153606",
+                          "mime":  "image/png",
+                          "size":  28479
+                      },
+                      {
+                          "title":  "Infinity Chamber.png",
+                          "file":  "infinity-chamber.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/32/Infinity_Chamber.png/revision/latest?cb=20190223165047",
+                          "mime":  "image/png",
+                          "size":  32558
+                      },
+                      {
+                          "title":  "Invigorating Blast.png",
+                          "file":  "invigorating-blast.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/c/ca/Invigorating_Blast.png/revision/latest?cb=20190512205315",
+                          "mime":  "image/png",
+                          "size":  40540
+                      },
+                      {
+                          "title":  "Javelin Throw.png",
+                          "file":  "javelin-throw.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/02/Javelin_Throw.png/revision/latest?cb=20181217032932",
+                          "mime":  "image/png",
+                          "size":  16319
+                      },
+                      {
+                          "title":  "Kinetic Launcher.png",
+                          "file":  "kinetic-launcher.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/bb/Kinetic_Launcher.png/revision/latest?cb=20201007152621",
+                          "mime":  "image/png",
+                          "size":  24259
+                      },
+                      {
+                          "title":  "Long Knuckle.png",
+                          "file":  "long-knuckle.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/45/Long_Knuckle.png/revision/latest?cb=20201007154825",
+                          "mime":  "image/png",
+                          "size":  29908
+                      },
+                      {
+                          "title":  "Massive Spin.png",
+                          "file":  "massive-spin.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/50/Massive_Spin.png/revision/latest?cb=20181217032956",
+                          "mime":  "image/png",
+                          "size":  14992
+                      },
+                      {
+                          "title":  "Minotaur Rush.png",
+                          "file":  "minotaur-rush.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/01/Minotaur_Rush.png/revision/latest?cb=20181230000234",
+                          "mime":  "image/png",
+                          "size":  15668
+                      },
+                      {
+                          "title":  "Mirage Flight.png",
+                          "file":  "mirage-flight.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/81/Mirage_Flight.png/revision/latest?cb=20181230000652",
+                          "mime":  "image/png",
+                          "size":  16123
+                      },
+                      {
+                          "title":  "Multi Skewer.png",
+                          "file":  "multi-skewer.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/c/cb/Multi_Skewer.png/revision/latest?cb=20181217033028",
+                          "mime":  "image/png",
+                          "size":  14893
+                      },
+                      {
+                          "title":  "Peerless Parry.png",
+                          "file":  "peerless-parry.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/84/Peerless_Parry.png/revision/latest?cb=20181230212900",
+                          "mime":  "image/png",
+                          "size":  17213
+                      },
+                      {
+                          "title":  "Perfect Shot.png",
+                          "file":  "perfect-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/b/bb/Perfect_Shot.png/revision/latest?cb=20181216013849",
+                          "mime":  "image/png",
+                          "size":  14711
+                      },
+                      {
+                          "title":  "Piercing Barrage.png",
+                          "file":  "piercing-barrage.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/0b/Piercing_Barrage.png/revision/latest?cb=20181216013759",
+                          "mime":  "image/png",
+                          "size":  15834
+                      },
+                      {
+                          "title":  "Piercing Fire.png",
+                          "file":  "piercing-fire.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/62/Piercing_Fire.png/revision/latest?cb=20201007150114",
+                          "mime":  "image/png",
+                          "size":  23853
+                      },
+                      {
+                          "title":  "Piercing Wave.png",
+                          "file":  "piercing-wave.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/d/dd/Piercing_Wave.png/revision/latest?cb=20200105153025",
+                          "mime":  "image/png",
+                          "size":  25089
+                      },
+                      {
+                          "title":  "Point-Blank Shot.png",
+                          "file":  "point-blank-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/55/Point-Blank_Shot.png/revision/latest?cb=20181214015847",
+                          "mime":  "image/png",
+                          "size":  26423
+                      },
+                      {
+                          "title":  "Pulverizing Blow.png",
+                          "file":  "pulverizing-blow.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/30/Pulverizing_Blow.png/revision/latest?cb=20181230000227",
+                          "mime":  "image/png",
+                          "size":  16594
+                      },
+                      {
+                          "title":  "Quake Cutter.png",
+                          "file":  "quake-cutter.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/8f/Quake_Cutter.png/revision/latest?cb=20201007153447",
+                          "mime":  "image/png",
+                          "size":  29712
+                      },
+                      {
+                          "title":  "Quick Spin.png",
+                          "file":  "quick-spin.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/3d/Quick_Spin.png/revision/latest?cb=20181217032948",
+                          "mime":  "image/png",
+                          "size":  15890
+                      },
+                      {
+                          "title":  "Relentless Barrage.png",
+                          "file":  "relentless-barrage.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/02/Relentless_Barrage.png/revision/latest?cb=20181216013936",
+                          "mime":  "image/png",
+                          "size":  17082
+                      },
+                      {
+                          "title":  "Rending Claws.png",
+                          "file":  "rending-claws.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/e/e4/Rending_Claws.png/revision/latest?cb=20200927231205",
+                          "mime":  "image/png",
+                          "size":  26358
+                      },
+                      {
+                          "title":  "Ricochet Fire.png",
+                          "file":  "ricochet-fire.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/49/Ricochet_Fire.png/revision/latest?cb=20201111171254",
+                          "mime":  "image/png",
+                          "size":  9906
+                      },
+                      {
+                          "title":  "Rocket Bomb.png",
+                          "file":  "rocket-bomb.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/33/Rocket_Bomb.png/revision/latest?cb=20201007145855",
+                          "mime":  "image/png",
+                          "size":  27289
+                      },
+                      {
+                          "title":  "Rolling Knuckle.png",
+                          "file":  "rolling-knuckle.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/50/Rolling_Knuckle.png/revision/latest?cb=20201007154932",
+                          "mime":  "image/png",
+                          "size":  27390
+                      },
+                      {
+                          "title":  "Rush Kick.png",
+                          "file":  "rush-kick.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/d/dc/Rush_Kick.png/revision/latest?cb=20201007153521",
+                          "mime":  "image/png",
+                          "size":  27020
+                      },
+                      {
+                          "title":  "Seeking Fire.png",
+                          "file":  "seeking-fire.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/e/ec/Seeking_Fire.png/revision/latest?cb=20190223165031",
+                          "mime":  "image/png",
+                          "size":  28636
+                      },
+                      {
+                          "title":  "Shadow Slash.png",
+                          "file":  "shadow-slash.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/45/Shadow_Slash.png/revision/latest?cb=20200128222253",
+                          "mime":  "image/png",
+                          "size":  25569
+                      },
+                      {
+                          "title":  "Sniper Shot.png",
+                          "file":  "sniper-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/5b/Sniper_Shot.png/revision/latest?cb=20181214015849",
+                          "mime":  "image/png",
+                          "size":  25790
+                      },
+                      {
+                          "title":  "Spear Charged Skewer.png",
+                          "file":  "spear-charged-skewer.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/01/Spear_Charged_Skewer.png/revision/latest?cb=20200723143550",
+                          "mime":  "image/png",
+                          "size":  31021
+                      },
+                      {
+                          "title":  "Spear Flaring Spin.png",
+                          "file":  "spear-flaring-spin.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/65/Spear_Flaring_Spin.png/revision/latest?cb=20201007163139",
+                          "mime":  "image/png",
+                          "size":  27991
+                      },
+                      {
+                          "title":  "Spear Serrated Point.png",
+                          "file":  "spear-serrated-point.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/e/e2/Spear_Serrated_Point.png/revision/latest?cb=20200723143616",
+                          "mime":  "image/png",
+                          "size":  25850
+                      },
+                      {
+                          "title":  "Spear Triple Jab.png",
+                          "file":  "spear-triple-jab.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/e/e7/Spear_Triple_Jab.png/revision/latest?cb=20201007163226",
+                          "mime":  "image/png",
+                          "size":  27022
+                      },
+                      {
+                          "title":  "Spear Winged Serpent.png",
+                          "file":  "spear-winged-serpent.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/9/95/Spear_Winged_Serpent.png/revision/latest?cb=20200723143630",
+                          "mime":  "image/png",
+                          "size":  27812
+                      },
+                      {
+                          "title":  "Spread Fire.png",
+                          "file":  "spread-fire.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/25/Spread_Fire.png/revision/latest?cb=20190223164919",
+                          "mime":  "image/png",
+                          "size":  22081
+                      },
+                      {
+                          "title":  "Sudden Rush.png",
+                          "file":  "sudden-rush.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/1a/Sudden_Rush.png/revision/latest?cb=20181230000242",
+                          "mime":  "image/png",
+                          "size":  17014
+                      },
+                      {
+                          "title":  "Sudden Sunder.png",
+                          "file":  "sudden-sunder.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/f/fa/Sudden_Sunder.png/revision/latest?cb=20181221233402",
+                          "mime":  "image/png",
+                          "size":  30232
+                      },
+                      {
+                          "title":  "Super Nova.png",
+                          "file":  "super-nova.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/1a/Super_Nova.png/revision/latest?cb=20181214040524",
+                          "mime":  "image/png",
+                          "size":  14476
+                      },
+                      {
+                          "title":  "Sword Greater Consecration.png",
+                          "file":  "sword-greater-consecration.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/26/Sword_Greater_Consecration.png/revision/latest?cb=20200723141753",
+                          "mime":  "image/png",
+                          "size":  25781
+                      },
+                      {
+                          "title":  "Sword Hoarding Slash.png",
+                          "file":  "sword-hoarding-slash.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/2f/Sword_Hoarding_Slash.png/revision/latest?cb=20200723141551",
+                          "mime":  "image/png",
+                          "size":  25735
+                      },
+                      {
+                          "title":  "Sword Snap Nova.png",
+                          "file":  "sword-snap-nova.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/f/f0/Sword_Snap_Nova.png/revision/latest?cb=20200723141652",
+                          "mime":  "image/png",
+                          "size":  25290
+                      },
+                      {
+                          "title":  "Targeting System.png",
+                          "file":  "targeting-system.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/f/f5/Targeting_System.png/revision/latest?cb=20201111173559",
+                          "mime":  "image/png",
+                          "size":  9476
+                      },
+                      {
+                          "title":  "Triple Beam.png",
+                          "file":  "triple-beam.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/11/Triple_Beam.png/revision/latest?cb=20201007151524",
+                          "mime":  "image/png",
+                          "size":  23065
+                      },
+                      {
+                          "title":  "Triple Bomb.png",
+                          "file":  "triple-bomb.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/c/c5/Triple_Bomb.png/revision/latest?cb=20190223165204",
+                          "mime":  "image/png",
+                          "size":  33626
+                      },
+                      {
+                          "title":  "Triple Shot.png",
+                          "file":  "triple-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/6c/Triple_Shot.png/revision/latest?cb=20181214015850",
+                          "mime":  "image/png",
+                          "size":  25129
+                      },
+                      {
+                          "title":  "Twin Shot.png",
+                          "file":  "twin-shot.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/e/ed/Twin_Shot.png/revision/latest?cb=20190223164057",
+                          "mime":  "image/png",
+                          "size":  30607
+                      },
+                      {
+                          "title":  "Unyielding Defense.png",
+                          "file":  "unyielding-defense.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/9/9e/Unyielding_Defense.png/revision/latest?cb=20201007161555",
+                          "mime":  "image/png",
+                          "size":  23924
+                      },
+                      {
+                          "title":  "Vicious Skewer.png",
+                          "file":  "vicious-skewer.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/57/Vicious_Skewer.png/revision/latest?cb=20181217180455",
+                          "mime":  "image/png",
+                          "size":  17315
+                      },
+                      {
+                          "title":  "World Splitter.png",
+                          "file":  "world-splitter.png",
+                          "sourceUrl":  "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/28/World_Splitter.png/revision/latest?cb=20181214015852",
+                          "mime":  "image/png",
+                          "size":  25286
+                      }
+                  ],
+        "Count":  92
+    }
+]

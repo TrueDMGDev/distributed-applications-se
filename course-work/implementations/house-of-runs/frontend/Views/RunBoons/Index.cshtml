@@ -1,0 +1,68 @@
+@model ListPageViewModel<RunBoonResponse>
+@{
+    ViewData["Title"] = "Run Boons";
+}
+
+<section class="hero">
+    <h1>Run Boons</h1>
+    <p>CRUD page for the many-to-many records that attach boons to runs.</p>
+    <a class="button primary" asp-action="Create">Create Run Boon</a>
+</section>
+
+<form asp-action="Index" method="get" class="panel filters">
+    <input name="runId" value="@Model.Filters.GetValueOrDefault("runId")" placeholder="Run id" />
+    <input name="boonId" value="@Model.Filters.GetValueOrDefault("boonId")" placeholder="Boon id" />
+    <input name="slotType" maxlength="50" value="@Model.Filters.GetValueOrDefault("slotType")" placeholder="Slot" />
+    <select name="isCore">
+        <option value="">Any core state</option>
+        <option value="true" selected="@(Model.Filters.GetValueOrDefault("isCore") == "True")">Core</option>
+        <option value="false" selected="@(Model.Filters.GetValueOrDefault("isCore") == "False")">Not core</option>
+    </select>
+    <select name="sortBy">
+        <option value="addedAt" selected="@(Model.SortBy == "addedAt")">Added</option>
+        <option value="slot" selected="@(Model.SortBy == "slot")">Slot</option>
+        <option value="level" selected="@(Model.SortBy == "level")">Level</option>
+    </select>
+    <select name="sortDir">
+        <option value="desc" selected="@(Model.SortDir == "desc")">Descending</option>
+        <option value="asc" selected="@(Model.SortDir == "asc")">Ascending</option>
+    </select>
+    <button type="submit" class="primary">Apply</button>
+</form>
+
+<section class="panel table-wrap">
+    <table>
+        <thead><tr><th>Boon</th><th>God</th><th>Slot</th><th>Level</th><th>Core</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var item in Model.Page.Items)
+        {
+            <tr>
+                <td>@item.BoonName</td>
+                <td>@item.God</td>
+                <td>@item.SlotType</td>
+                <td>@item.LevelUsed</td>
+                <td>@(item.IsCoreBoon ? "Yes" : "No")</td>
+                <td class="actions">
+                    <a class="button" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@item.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>
+
+<div class="pagination panel">
+    @if (Model.Page.Page > 1)
+    {
+        <a class="button" asp-route-page="@(Model.Page.Page - 1)" asp-route-runId="@Model.Filters.GetValueOrDefault("runId")" asp-route-boonId="@Model.Filters.GetValueOrDefault("boonId")" asp-route-slotType="@Model.Filters.GetValueOrDefault("slotType")" asp-route-isCore="@Model.Filters.GetValueOrDefault("isCore")" asp-route-sortBy="@Model.SortBy" asp-route-sortDir="@Model.SortDir">Previous</a>
+    }
+    <span class="muted">Page @Model.Page.Page of @Math.Max(1, Model.Page.TotalPages)</span>
+    @if (Model.Page.Page < Model.Page.TotalPages)
+    {
+        <a class="button" asp-route-page="@(Model.Page.Page + 1)" asp-route-runId="@Model.Filters.GetValueOrDefault("runId")" asp-route-boonId="@Model.Filters.GetValueOrDefault("boonId")" asp-route-slotType="@Model.Filters.GetValueOrDefault("slotType")" asp-route-isCore="@Model.Filters.GetValueOrDefault("isCore")" asp-route-sortBy="@Model.SortBy" asp-route-sortDir="@Model.SortDir">Next</a>
+    }
+</div>

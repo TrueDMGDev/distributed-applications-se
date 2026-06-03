@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - House of Runs</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            var isAdmin = User.IsInRole("Admin");
+            <nav class="nav-links" aria-label="Primary">
+                <a asp-controller="Runs" asp-action="Index">Home</a>
+                <a asp-controller="Runs" asp-action="Mine">My Runs</a>
+                <a asp-controller="Runs" asp-action="Create">Create Run</a>
+                <a asp-controller="Runs" asp-action="Import">Import JSON</a>
+                @if (isAdmin)
+                {
+                    <a asp-controller="Weapons" asp-action="Index">Weapons</a>
+                    <a asp-controller="Boons" asp-action="Index">Boons</a>
+                    <a asp-controller="RunBoons" asp-action="Index">Run Boons</a>
+                    <a asp-controller="Users" asp-action="Index">Users</a>
+                }
+            </nav>
+            <a class="brand" asp-controller="Runs" asp-action="Index">House of Runs</a>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
+                @Html.AntiForgeryToken()
+                <span>@User.FindFirst("display_name")?.Value</span>
+                <button type="submit">Logout</button>
+            </form>
+        }
+        else
+        {
+            <div></div>
+            <a class="brand" asp-controller="Runs" asp-action="Index">House of Runs</a>
+            <div></div>
+        }
+    </header>
+
+    <main class="page">
+        @if (TempData["Message"] is string message)
+        {
+            <div class="alert-good">@message</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="validation-summary-errors">@error</div>
+        }
+        @RenderBody()
+    </main>
+</body>
+</html>

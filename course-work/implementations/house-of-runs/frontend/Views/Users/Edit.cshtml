@@ -1,0 +1,27 @@
+@model UpdateUserRequest
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<section class="hero">
+    <h1>Edit User</h1>
+</section>
+
+<form method="post" class="panel">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="grid">
+        <label>Username<input asp-for="UserName" maxlength="32" /><span asp-validation-for="UserName"></span></label>
+        <label>Display name<input asp-for="DisplayName" maxlength="60" /><span asp-validation-for="DisplayName"></span></label>
+        <label>Email<input asp-for="Email" maxlength="120" /><span asp-validation-for="Email"></span></label>
+        <label>Role<select asp-for="Role"><option>User</option><option>Admin</option></select></label>
+        <label>Reputation<input asp-for="Reputation" type="number" min="0" max="999999" /></label>
+        <label>Active<select asp-for="IsActive"><option value="true">Yes</option><option value="false">No</option></select></label>
+        <label>Avatar URL<input asp-for="AvatarUrl" maxlength="300" /><span asp-validation-for="AvatarUrl"></span></label>
+        <label class="wide">Bio<textarea asp-for="Bio" maxlength="300"></textarea><span asp-validation-for="Bio"></span></label>
+    </div>
+    <div class="actions">
+        <button type="submit" class="primary">Save User</button>
+        <a class="button" asp-action="Index">Cancel</a>
+    </div>
+</form>

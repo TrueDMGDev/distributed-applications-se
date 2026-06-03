@@ -1,0 +1,37 @@
+@model RegisterRequest
+@{
+    ViewData["Title"] = "Register";
+}
+
+<form asp-action="Register" method="post" class="auth-card">
+    @Html.AntiForgeryToken()
+    <h1>Create Account</h1>
+    <p class="muted">The frontend logs you in with a secure cookie after the backend returns a bearer token.</p>
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="grid">
+        <label>
+            Username
+            <input asp-for="UserName" maxlength="32" />
+            <span asp-validation-for="UserName"></span>
+        </label>
+        <label>
+            Display name
+            <input asp-for="DisplayName" maxlength="60" />
+            <span asp-validation-for="DisplayName"></span>
+        </label>
+        <label class="wide">
+            Email
+            <input asp-for="Email" maxlength="120" />
+            <span asp-validation-for="Email"></span>
+        </label>
+        <label class="wide">
+            Password
+            <input asp-for="Password" type="password" maxlength="80" />
+            <span asp-validation-for="Password"></span>
+        </label>
+    </div>
+    <div class="actions">
+        <button type="submit" class="primary">Register</button>
+        <a class="button" asp-action="Login">Login</a>
+    </div>
+</form>

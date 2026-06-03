@@ -1,0 +1,11 @@
+backend/bin/
+backend/obj/
+frontend/bin/
+frontend/obj/
+frontend/App_Data/
+frontend/node_modules/
+frontend/dist/
+logs/
+verify-build/
+*.user
+*.suo
