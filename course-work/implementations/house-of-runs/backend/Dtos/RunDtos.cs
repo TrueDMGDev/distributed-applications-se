@@ -20,6 +20,7 @@ public sealed record RunResponse(
     bool IsPublic,
     string Source,
     string? Notes,
+    string? FullDescription,
     string? ScreenshotUrl,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
@@ -61,6 +62,9 @@ public sealed class RunRequest
 
     [MaxLength(1000)]
     public string? Notes { get; set; }
+
+    [Required, MinLength(11), MaxLength(999)]
+    public string FullDescription { get; set; } = string.Empty;
 
     [MaxLength(300), Url]
     public string? ScreenshotUrl { get; set; }

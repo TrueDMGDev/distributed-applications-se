@@ -358,6 +358,7 @@ public sealed class RunsController(HouseOfRunsDbContext db) : ControllerBase
         run.IsPublic = request.IsPublic;
         run.Source = NormalizeSource(request.Source);
         run.Notes = request.Notes;
+        run.FullDescription = request.FullDescription;
         run.ScreenshotUrl = request.ScreenshotUrl;
     }
 
@@ -389,6 +390,7 @@ public sealed class RunsController(HouseOfRunsDbContext db) : ControllerBase
         run.IsPublic,
         run.Source,
         run.Notes,
+        run.FullDescription,
         run.ScreenshotUrl,
         run.CreatedAt,
         run.UpdatedAt,

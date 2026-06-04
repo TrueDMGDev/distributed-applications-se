@@ -49,7 +49,7 @@ public sealed class RunsController(HouseApiClient api, IWebHostEnvironment envir
     {
         var model = await BuildRunFormAsync(new RunFormViewModel
         {
-            Run = new RunRequest { PlayedAt = DateTime.Now, Source = "Manual", IsPublic = false },
+            Run = new RunRequest { PlayedAt = DateTime.Now, Source = "Manual", IsPublic = false, FullDescription = string.Empty },
             BoonRows = EmptyBoonRows()
         });
 
@@ -97,6 +97,7 @@ public sealed class RunsController(HouseApiClient api, IWebHostEnvironment envir
                 IsPublic = run.IsPublic,
                 Source = run.Source,
                 Notes = run.Notes,
+                FullDescription = run.FullDescription ?? string.Empty,
                 ScreenshotUrl = run.ScreenshotUrl
             },
             BoonRows = NormalizeBoonRows(run.Boons.Select(boon => new RunBoonRequest
@@ -389,30 +390,46 @@ public sealed class RunsController(HouseApiClient api, IWebHostEnvironment envir
         BoonRows = NormalizeBoonRows(ToRunRequest(draft).Boons)
     };
 
-    private static RunRequest ToRunRequest(ImportRunDraftResponse draft) => new()
+    private static RunRequest ToRunRequest(ImportRunDraftResponse draft)
     {
-        WeaponId = draft.WeaponId ?? Guid.Empty,
-        Title = draft.Title,
-        HeatLevel = draft.HeatLevel,
-        DurationSeconds = draft.DurationSeconds,
-        Result = draft.Result,
-        FinalBiome = draft.FinalBiome,
-        DefeatedBoss = draft.DefeatedBoss,
-        PlayedAt = draft.PlayedAt.ToLocalTime(),
-        IsPublic = false,
-        Source = draft.Source,
-        Notes = draft.Notes,
-        Boons = draft.Boons
-            .Where(boon => boon.BoonId.HasValue)
-            .Select(boon => new RunBoonRequest
-            {
-                BoonId = boon.BoonId!.Value,
-                SlotType = boon.SlotType,
-                LevelUsed = boon.LevelUsed,
-                IsCoreBoon = boon.IsCoreBoon
-            })
-            .ToList()
-    };
+        var defaultDesc = $"{draft.Title} — {draft.Result} in {draft.FinalBiome}";
+        string fullDescription;
+
+        if (!string.IsNullOrWhiteSpace(draft.Notes))
+        {
+            fullDescription = draft.Notes.Length >= 11 ? draft.Notes : draft.Notes + " " + defaultDesc;
+        }
+        else
+        {
+            fullDescription = defaultDesc;
+        }
+
+        return new RunRequest
+        {
+            WeaponId = draft.WeaponId ?? Guid.Empty,
+            Title = draft.Title,
+            HeatLevel = draft.HeatLevel,
+            DurationSeconds = draft.DurationSeconds,
+            Result = draft.Result,
+            FinalBiome = draft.FinalBiome,
+            DefeatedBoss = draft.DefeatedBoss,
+            PlayedAt = draft.PlayedAt.ToLocalTime(),
+            IsPublic = false,
+            Source = draft.Source,
+            Notes = draft.Notes,
+            FullDescription = fullDescription,
+            Boons = draft.Boons
+                .Where(boon => boon.BoonId.HasValue)
+                .Select(boon => new RunBoonRequest
+                {
+                    BoonId = boon.BoonId!.Value,
+                    SlotType = boon.SlotType,
+                    LevelUsed = boon.LevelUsed,
+                    IsCoreBoon = boon.IsCoreBoon
+                })
+                .ToList()
+        };
+    }
 
     private RunWeaponOption ToWeaponOption(WeaponResponse weapon)
     {

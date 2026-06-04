@@ -44,6 +44,11 @@
     {
         <p><a href="@Model.ScreenshotUrl">Screenshot</a></p>
     }
+    @if (!string.IsNullOrWhiteSpace(Model.FullDescription))
+    {
+        <h3>Full description</h3>
+        <p>@Model.FullDescription</p>
+    }
 </section>
 
 <section class="panel table-wrap">

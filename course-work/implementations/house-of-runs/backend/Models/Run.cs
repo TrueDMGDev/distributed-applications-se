@@ -40,6 +40,9 @@ public sealed class Run
     [MaxLength(1000)]
     public string? Notes { get; set; }
 
+    [Required, MinLength(11), MaxLength(999)]
+    public string FullDescription { get; set; } = string.Empty;
+
     [MaxLength(300)]
     public string? ScreenshotUrl { get; set; }
 
